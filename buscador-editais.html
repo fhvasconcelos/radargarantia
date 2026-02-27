@@ -8,550 +8,106 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0c0f;
-    --surface: #111418;
-    --surface2: #181c22;
-    --border: #232830;
-    --accent: #00e5a0;
-    --accent2: #0077ff;
-    --warn: #ff9500;
-    --text: #e8edf3;
-    --muted: #5a6478;
-    --muted2: #8a95a8;
+    --bg: #0a0c0f; --surface: #111418; --surface2: #181c22; --border: #232830;
+    --accent: #00e5a0; --accent2: #0077ff; --warn: #ff9500;
+    --text: #e8edf3; --muted: #5a6478; --muted2: #8a95a8;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    min-height: 100vh;
-  }
+  header { border-bottom: 1px solid var(--border); padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; background: var(--surface); position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .logo-text { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo-text span { color: var(--accent); }
+  .badge { font-family: 'DM Mono', monospace; font-size: 11px; background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); padding: 4px 10px; border-radius: 20px; }
 
-  /* HEADER */
-  header {
-    border-bottom: 1px solid var(--border);
-    padding: 20px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--surface);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
+  main { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
 
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+  .search-section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+  .search-title { font-size: 13px; font-family: 'DM Mono', monospace; color: var(--muted2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+  .filters-grid { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  label { font-size: 12px; color: var(--muted2); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px; }
+  input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 10px 14px; outline: none; transition: border-color 0.2s; width: 100%; }
+  input:focus { border-color: var(--accent); }
 
-  .logo-icon {
-    width: 36px;
-    height: 36px;
-    background: var(--accent);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-  }
-
-  .logo-text {
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-  }
-
-  .logo-text span {
-    color: var(--accent);
-  }
-
-  .badge {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    background: rgba(0,229,160,0.1);
-    color: var(--accent);
-    border: 1px solid rgba(0,229,160,0.2);
-    padding: 4px 10px;
-    border-radius: 20px;
-    letter-spacing: 0.5px;
-  }
-
-  /* MAIN */
-  main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 32px 24px;
-  }
-
-  /* SEARCH BAR */
-  .search-section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 24px;
-  }
-
-  .search-title {
-    font-size: 13px;
-    font-family: 'DM Mono', monospace;
-    color: var(--muted2);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 16px;
-  }
-
-  .filters-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr auto;
-    gap: 12px;
-    align-items: end;
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  label {
-    font-size: 12px;
-    color: var(--muted2);
-    font-family: 'DM Mono', monospace;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  input, select {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    padding: 10px 14px;
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%;
-  }
-
-  input:focus, select:focus {
-    border-color: var(--accent);
-  }
-
-  select option {
-    background: var(--surface2);
-  }
-
-  .btn-search {
-    background: var(--accent);
-    color: #000;
-    border: none;
-    border-radius: 8px;
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    padding: 10px 28px;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    white-space: nowrap;
-    height: 40px;
-  }
-
+  .btn-search { background: var(--accent); color: #000; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; padding: 10px 28px; cursor: pointer; transition: opacity 0.2s; height: 40px; white-space: nowrap; }
   .btn-search:hover { opacity: 0.85; }
-  .btn-search:active { transform: scale(0.97); }
   .btn-search:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* STATS BAR */
-  .stats-bar {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 20px;
-  }
-
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 20px;
-    flex: 1;
-  }
-
-  .stat-label {
-    font-size: 11px;
-    color: var(--muted2);
-    font-family: 'DM Mono', monospace;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
-  }
-
-  .stat-value {
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--accent);
-  }
-
+  .stats-bar { display: flex; gap: 16px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 20px; flex: 1; }
+  .stat-label { font-size: 11px; color: var(--muted2); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .stat-value { font-size: 22px; font-weight: 800; color: var(--accent); }
   .stat-value.blue { color: var(--accent2); }
   .stat-value.orange { color: var(--warn); }
 
-  /* TOOLBAR */
-  .toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .results-count { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted2); }
+  .btn-export { background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--muted2); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; padding: 7px 16px; cursor: pointer; transition: all 0.2s; display: none; }
+  .btn-export:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-export.visible { display: block; }
 
-  .results-count {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--muted2);
-  }
-
-  .btn-export {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--muted2);
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 7px 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .btn-export:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
-  /* TABLE */
-  .table-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  thead {
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-  }
-
-  th {
-    padding: 12px 16px;
-    text-align: left;
-    font-size: 11px;
-    font-family: 'DM Mono', monospace;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--muted2);
-    font-weight: 500;
-  }
-
-  td {
-    padding: 14px 16px;
-    font-size: 13px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: top;
-  }
-
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: var(--surface2); border-bottom: 1px solid var(--border); }
+  th { padding: 12px 16px; text-align: left; font-size: 11px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted2); font-weight: 500; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable:hover { color: var(--accent); }
+  td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: top; }
   tr:last-child td { border-bottom: none; }
-
   tr:hover td { background: rgba(255,255,255,0.02); }
 
-  .empresa-nome {
-    font-weight: 700;
-    font-size: 14px;
-    margin-bottom: 2px;
-    color: var(--text);
-  }
+  .empresa-nome { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+  .empresa-cnpj { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted2); }
+  .orgao-nome { font-size: 12px; color: var(--muted2); }
+  .objeto-text { font-size: 12px; color: var(--muted2); line-height: 1.5; max-width: 280px; }
+  .valor { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--accent); white-space: nowrap; }
+  .valor-garantia { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--warn); margin-top: 3px; }
+  .data-col { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted2); white-space: nowrap; }
 
-  .empresa-cnpj {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--muted2);
-  }
+  .btn-prospectar { background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.2); border-radius: 6px; color: var(--accent); font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 600; padding: 6px 12px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .btn-prospectar:hover { background: rgba(0,229,160,0.2); border-color: var(--accent); }
 
-  .orgao-nome {
-    font-size: 12px;
-    color: var(--muted2);
-    margin-top: 2px;
-  }
-
-  .objeto-text {
-    font-size: 12px;
-    color: var(--muted2);
-    line-height: 1.5;
-    max-width: 280px;
-  }
-
-  .valor {
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--accent);
-    white-space: nowrap;
-  }
-
-  .valor-garantia {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--warn);
-    margin-top: 3px;
-  }
-
-  .data {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--muted2);
-    white-space: nowrap;
-  }
-
-  .btn-prospectar {
-    background: rgba(0,229,160,0.1);
-    border: 1px solid rgba(0,229,160,0.2);
-    border-radius: 6px;
-    color: var(--accent);
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 6px 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-
-  .btn-prospectar:hover {
-    background: rgba(0,229,160,0.2);
-    border-color: var(--accent);
-  }
-
-  /* STATUS */
-  .loading {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--muted2);
-    font-family: 'DM Mono', monospace;
-  }
-
-  .spinner {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    margin-bottom: 12px;
-  }
-
+  .loading { text-align: center; padding: 60px 20px; color: var(--muted2); font-family: 'DM Mono', monospace; }
+  .spinner { display: inline-block; width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 12px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--muted);
-  }
+  .sentinel { height: 80px; display: flex; align-items: center; justify-content: center; }
+  .load-more { display: none; align-items: center; gap: 10px; color: var(--muted2); font-family: 'DM Mono', monospace; font-size: 12px; }
+  .load-more.active { display: flex; }
+  .load-more .spinner { width: 18px; height: 18px; margin: 0; }
 
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
   .empty-icon { font-size: 40px; margin-bottom: 12px; }
-  .empty-text { font-size: 14px; }
+  .empty-text { font-size: 14px; line-height: 1.8; }
 
-  /* MODAL */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 200;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-  }
-
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
   .modal-overlay.open { display: flex; }
-
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px;
-    width: 90%;
-    max-width: 540px;
-    position: relative;
-    animation: modalIn 0.2s ease;
-  }
-
-  @keyframes modalIn {
-    from { opacity: 0; transform: translateY(10px) scale(0.97); }
-    to { opacity: 1; transform: none; }
-  }
-
-  .modal-close {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background: none;
-    border: none;
-    color: var(--muted2);
-    font-size: 20px;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-  }
-
-  .modal-close:hover { background: var(--surface2); }
-
-  .modal h2 {
-    font-size: 18px;
-    font-weight: 800;
-    margin-bottom: 6px;
-  }
-
-  .modal-sub {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--muted2);
-    margin-bottom: 20px;
-  }
-
-  .modal-field {
-    margin-bottom: 14px;
-  }
-
-  .modal-field label {
-    display: block;
-    margin-bottom: 6px;
-  }
-
-  .modal-field input, .modal-field textarea {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    padding: 10px 14px;
-    outline: none;
-    resize: vertical;
-  }
-
-  .modal-field textarea { min-height: 100px; line-height: 1.5; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 90%; max-width: 540px; position: relative; animation: modalIn 0.2s ease; }
+  @keyframes modalIn { from { opacity:0; transform:translateY(10px) scale(0.97); } to { opacity:1; transform:none; } }
+  .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--muted2); font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 4px; }
+  .modal h2 { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+  .modal-sub { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted2); margin-bottom: 20px; }
+  .modal-field { margin-bottom: 14px; }
+  .modal-field label { display: block; margin-bottom: 6px; }
+  .modal-field input, .modal-field textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 10px 14px; outline: none; resize: vertical; }
+  .modal-field textarea { min-height: 120px; line-height: 1.5; }
   .modal-field input:focus, .modal-field textarea:focus { border-color: var(--accent); }
-
-  .modal-footer {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    margin-top: 20px;
-  }
-
-  .btn-cancel {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--muted2);
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 9px 20px;
-    cursor: pointer;
-  }
-
-  .btn-copy {
-    background: var(--accent);
-    border: none;
-    border-radius: 8px;
-    color: #000;
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 9px 20px;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  .btn-cancel { background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--muted2); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; cursor: pointer; }
+  .btn-copy { background: var(--accent); border: none; border-radius: 8px; color: #000; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; padding: 9px 20px; cursor: pointer; }
   .btn-copy:hover { opacity: 0.85; }
 
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--accent);
-    color: #000;
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 12px 20px;
-    border-radius: 10px;
-    z-index: 300;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.3s;
-    pointer-events: none;
-  }
-
-  .toast.show {
-    opacity: 1;
-    transform: none;
-  }
-
-  .pagination {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 16px;
-    border-top: 1px solid var(--border);
-  }
-
-  .btn-page {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--muted2);
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    padding: 6px 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn-page:hover, .btn-page.active {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
-  .btn-page:disabled { opacity: 0.3; cursor: not-allowed; }
-
-  .page-info {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--muted2);
-    padding: 0 8px;
-  }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--accent); color: #000; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; padding: 12px 20px; border-radius: 10px; z-index: 300; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: none; }
 
   @media (max-width: 768px) {
     .filters-grid { grid-template-columns: 1fr 1fr; }
     .btn-search { grid-column: span 2; }
     .stats-bar { flex-wrap: wrap; }
-    th:nth-child(3), td:nth-child(3),
-    th:nth-child(4), td:nth-child(4) { display: none; }
+    th:nth-child(3), td:nth-child(3), th:nth-child(4), td:nth-child(4) { display: none; }
   }
 </style>
 </head>
@@ -566,7 +122,6 @@
 </header>
 
 <main>
-
   <div class="search-section">
     <div class="search-title">🔎 Buscar contratos homologados</div>
     <div class="filters-grid">
@@ -580,17 +135,15 @@
       </div>
       <div class="field">
         <label>Valor mínimo (R$)</label>
-        <input type="number" id="valorMin" placeholder="100.000" step="1000">
+        <input type="text" id="valorMin" placeholder="1.000.000" oninput="mascaraValor(this)">
       </div>
-      <button class="btn-search" id="btnBuscar" onclick="buscarContratos()">
-        ⚡ Buscar
-      </button>
+      <button class="btn-search" id="btnBuscar" onclick="buscarContratos()">⚡ Buscar</button>
     </div>
   </div>
 
   <div class="stats-bar">
     <div class="stat-card">
-      <div class="stat-label">Contratos encontrados</div>
+      <div class="stat-label">Contratos carregados</div>
       <div class="stat-value" id="statTotal">—</div>
     </div>
     <div class="stat-card">
@@ -605,9 +158,7 @@
 
   <div class="toolbar">
     <div class="results-count" id="resultsCount"></div>
-    <button class="btn-export" id="btnExport" onclick="exportarCSV()" style="display:none">
-      ↓ Exportar CSV
-    </button>
+    <button class="btn-export" id="btnExport" onclick="exportarCSV()">↓ Exportar CSV</button>
   </div>
 
   <div class="table-wrap">
@@ -615,12 +166,10 @@
       <div class="empty-icon">🏛️</div>
       <div class="empty-text">Selecione um período e clique em Buscar</div>
     </div>
-
     <div class="loading" id="loadingState" style="display:none">
       <div><div class="spinner"></div></div>
       <div>Consultando PNCP...</div>
     </div>
-
     <table id="tabelaContratos" style="display:none">
       <thead>
         <tr>
@@ -628,38 +177,34 @@
           <th>Objeto</th>
           <th>Órgão</th>
           <th>Data</th>
-          <th style="cursor:pointer;user-select:none" onclick="inverterOrdem()" title="Clique para inverter ordem">Valor contrato ↓</th>
+          <th class="sortable" id="thValor" onclick="toggleOrdem()">Valor contrato ↓</th>
           <th>Ação</th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
     </table>
-
-    <div class="pagination" id="pagination" style="display:none">
-      <button class="btn-page" id="btnPrev" onclick="mudarPagina(-1)">← Anterior</button>
-      <span class="page-info" id="pageInfo"></span>
-      <button class="btn-page" id="btnNext" onclick="mudarPagina(1)">Próxima →</button>
+    <div class="sentinel" id="sentinel">
+      <div class="load-more" id="loadMore">
+        <div class="spinner"></div>
+        <span>Carregando mais contratos...</span>
+      </div>
     </div>
   </div>
-
 </main>
 
-<!-- Modal prospecção -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <button class="modal-close" onclick="fecharModal()">✕</button>
     <h2 id="modalEmpresa">—</h2>
-    <div class="modal-sub" id="modalCNPJ">—</div>
-
+    <div class="modal-sub" id="modalSub">—</div>
     <div class="modal-field">
-      <label>Assunto do email</label>
+      <label>Assunto</label>
       <input type="text" id="emailAssunto" readonly>
     </div>
     <div class="modal-field">
-      <label>Corpo do email (personalizável)</label>
+      <label>Corpo do email</label>
       <textarea id="emailCorpo"></textarea>
     </div>
-
     <div class="modal-footer">
       <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
       <button class="btn-copy" onclick="copiarEmail()">📋 Copiar email</button>
@@ -670,234 +215,230 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  let paginaAtual = 1;
-  let totalPaginas = 1;
-  let dadosCache = [];
-  let filtroValorMin = 0;
+  // ── Estado ────────────────────────────────────────────────────
+  let todos      = [];
+  let pagAtual   = 0;
+  let totalPags  = 1;
+  let carregando = false;
+  let ordemDesc  = true;
+  let valMin     = 0;
+  let dIni = '', dFim = '';
 
-  // Datas padrão: últimos 7 dias
+  // ── Datas padrão ─────────────────────────────────────────────
   const hoje = new Date();
-  const seteDias = new Date();
-  seteDias.setDate(hoje.getDate() - 7);
+  const menos7 = new Date(); menos7.setDate(hoje.getDate()-7);
+  document.getElementById('dataFinal').value   = iso(hoje);
+  document.getElementById('dataInicial').value = iso(menos7);
 
-  document.getElementById('dataFinal').value = formatDate(hoje);
-  document.getElementById('dataInicial').value = formatDate(seteDias);
-
-  function formatDate(d) {
-    return d.toISOString().split('T')[0];
-  }
-
-  function formatDateAPI(str) {
-    return str.replace(/-/g, '');
-  }
-
-  function formatDateBR(str) {
-    if (!str) return '—';
-    const s = str.substring(0, 10);
-    const [y, m, d] = s.split('-');
+  function iso(d) { return d.toISOString().split('T')[0]; }
+  function apiDate(s) { return s.replace(/-/g,''); }
+  function brDate(s) {
+    if (!s) return '—';
+    const [y,m,d] = s.substring(0,10).split('-');
     return `${d}/${m}/${y}`;
   }
+  function R$(v) {
+    if (!v) return '—';
+    return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(v);
+  }
+  function cnpj(c) {
+    if (!c) return '';
+    const s = String(c).replace(/\D/g,'').padStart(14,'0');
+    return `${s.slice(0,2)}.${s.slice(2,5)}.${s.slice(5,8)}/${s.slice(8,12)}-${s.slice(12,14)}`;
+  }
+  function cut(s,n) { if(!s) return '—'; return s.length>n ? s.slice(0,n)+'…':s; }
 
-  function formatReal(val) {
-    if (!val) return '—';
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency', currency: 'BRL', maximumFractionDigits: 0
-    }).format(val);
+  // ── Máscara campo valor ───────────────────────────────────────
+  function mascaraValor(el) {
+    const n = el.value.replace(/\D/g,'');
+    el.value = n ? parseInt(n,10).toLocaleString('pt-BR') : '';
   }
 
-  function formatCNPJ(cnpj) {
-    if (!cnpj) return '';
-    const c = String(cnpj).replace(/\D/g, '').padStart(14, '0');
-    return `${c.slice(0,2)}.${c.slice(2,5)}.${c.slice(5,8)}/${c.slice(8,12)}-${c.slice(12,14)}`;
+  function lerValMin() {
+    const n = document.getElementById('valorMin').value.replace(/\D/g,'');
+    return n ? parseInt(n,10) : 0;
   }
 
-  function truncate(str, n) {
-    if (!str) return '—';
-    return str.length > n ? str.substring(0, n) + '…' : str;
-  }
-
-  async function buscarContratos() {
-    const di = document.getElementById('dataInicial').value;
-    const df = document.getElementById('dataFinal').value;
-    filtroValorMin = parseFloat(document.getElementById('valorMin').value) || 0;
-
-    if (!di || !df) { showToast('⚠️ Preencha as datas'); return; }
-
-    paginaAtual = 1;
-    await carregarPagina(di, df);
-  }
-
-  // Proxies CORS públicos para contornar bloqueio do navegador
+  // ── Proxies CORS ──────────────────────────────────────────────
   const PROXIES = [
-    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
   ];
 
-  async function fetchComProxy(url) {
-    // Tenta direto primeiro
+  async function fetchPNCP(url) {
     try {
-      const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      const r = await fetch(url, {signal: AbortSignal.timeout(8000)});
       if (r.ok) return r.json();
-    } catch(e) {}
-
-    // Tenta cada proxy
-    for (const proxy of PROXIES) {
+    } catch(e){}
+    for (const p of PROXIES) {
       try {
-        const r = await fetch(proxy(url), { signal: AbortSignal.timeout(10000) });
+        const r = await fetch(p(url), {signal: AbortSignal.timeout(12000)});
         if (r.ok) return r.json();
-      } catch(e) {}
+      } catch(e){}
     }
-    throw new Error('Não foi possível conectar ao PNCP. Verifique sua conexão.');
+    throw new Error('Não foi possível conectar ao PNCP.<br><br><small>Tente abrir o arquivo via:<br><code style="background:#1a1f28;padding:2px 6px;border-radius:4px">python -m http.server 8080</code><br>e acesse <b>http://localhost:8080/buscador-editais.html</b></small>');
   }
 
-  async function carregarPagina(di, df) {
-    const btn = document.getElementById('btnBuscar');
-    btn.disabled = true;
-    btn.textContent = 'Buscando...';
+  // ── Busca principal ───────────────────────────────────────────
+  async function buscarContratos() {
+    dIni = document.getElementById('dataInicial').value;
+    dFim = document.getElementById('dataFinal').value;
+    valMin = lerValMin();
+
+    if (!dIni || !dFim) { toast('⚠️ Preencha as datas'); return; }
+
+    // Reset completo
+    todos = []; pagAtual = 0; totalPags = 1; carregando = false;
 
     document.getElementById('emptyState').style.display = 'none';
     document.getElementById('loadingState').style.display = 'block';
     document.getElementById('tabelaContratos').style.display = 'none';
-    document.getElementById('pagination').style.display = 'none';
-    document.getElementById('btnExport').style.display = 'none';
+    document.getElementById('btnExport').classList.remove('visible');
+    document.getElementById('tbody').innerHTML = '';
+    document.getElementById('statTotal').textContent = '—';
+    document.getElementById('statValor').textContent = '—';
+    document.getElementById('statPremio').textContent = '—';
+    document.getElementById('resultsCount').textContent = '';
+
+    const btn = document.getElementById('btnBuscar');
+    btn.disabled = true; btn.textContent = 'Buscando...';
 
     try {
-      const url = `https://pncp.gov.br/api/consulta/v1/contratos?dataInicial=${formatDateAPI(di)}&dataFinal=${formatDateAPI(df)}&pagina=${paginaAtual}&tamanhoPagina=20`;
-
-      const data = await fetchComProxy(url);
-
-      let items = data.data || [];
-
-      // Filtro por valor mínimo
-      if (filtroValorMin > 0) {
-        items = items.filter(c => (c.valorInicial || 0) >= filtroValorMin);
-      }
-
-      // Ordenar do maior para o menor contrato
-      items.sort((a, b) => (b.valorInicial || 0) - (a.valorInicial || 0));
-
-      dadosCache = items;
-      totalPaginas = data.totalPaginas || 1;
-
-      renderTabela(items, data.totalRegistros || items.length);
-
+      await carregarPagina();
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('tabelaContratos').style.display = 'table';
+      document.getElementById('btnExport').classList.add('visible');
     } catch(e) {
       document.getElementById('loadingState').style.display = 'none';
       document.getElementById('emptyState').style.display = 'block';
-      document.getElementById('emptyState').innerHTML = `
-        <div class="empty-icon">⚠️</div>
-        <div class="empty-text">${e.message}<br><br>
-        <small style="color:var(--muted);font-family:DM Mono,monospace;line-height:1.8">
-          <b style="color:var(--accent)">Solução:</b> Abra o arquivo via servidor local:<br>
-          1. Instale Python se não tiver<br>
-          2. No terminal, na pasta do arquivo:<br>
-          <span style="background:#1a1f28;padding:2px 8px;border-radius:4px">python -m http.server 8080</span><br>
-          3. Acesse: <span style="color:var(--accent)">http://localhost:8080/buscador-editais.html</span>
-        </small></div>
-      `;
+      document.getElementById('emptyState').innerHTML =
+        `<div class="empty-icon">⚠️</div><div class="empty-text">${e.message}</div>`;
     }
 
-    btn.disabled = false;
-    btn.textContent = '⚡ Buscar';
+    btn.disabled = false; btn.textContent = '⚡ Buscar';
   }
 
-  function renderTabela(items, total) {
-    document.getElementById('loadingState').style.display = 'none';
+  // ── Carrega próxima página ────────────────────────────────────
+  async function carregarPagina() {
+    if (carregando || pagAtual >= totalPags) return;
+    carregando = true;
+    pagAtual++;
 
-    if (!items.length) {
-      document.getElementById('emptyState').style.display = 'block';
-      document.getElementById('emptyState').innerHTML = `
-        <div class="empty-icon">🔍</div>
-        <div class="empty-text">Nenhum contrato encontrado neste período</div>
-      `;
-      document.getElementById('statTotal').textContent = '0';
-      document.getElementById('statValor').textContent = '—';
-      document.getElementById('statPremio').textContent = '—';
-      return;
-    }
+    if (pagAtual > 1) document.getElementById('loadMore').classList.add('active');
 
-    const valorTotal = items.reduce((s, c) => s + (c.valorInicial || 0), 0);
+    const url = `https://pncp.gov.br/api/consulta/v1/contratos?dataInicial=${apiDate(dIni)}&dataFinal=${apiDate(dFim)}&pagina=${pagAtual}&tamanhoPagina=50`;
+    const data = await fetchPNCP(url);
 
-    document.getElementById('statTotal').textContent = total.toLocaleString('pt-BR');
-    document.getElementById('statValor').textContent = formatReal(valorTotal);
-    document.getElementById('statPremio').textContent = formatReal(valorTotal * 0.05);
-    document.getElementById('resultsCount').textContent = `Mostrando ${items.length} de ${total} contratos`;
+    totalPags = data.totalPaginas || 1;
 
+    // Filtra por valor mínimo (sem máscara, valor bruto do campo)
+    const novos = (data.data || []).filter(c => (c.valorInicial || 0) >= valMin);
+    todos = todos.concat(novos);
+
+    // Ordena tudo
+    sortTodos();
+    renderTabela();
+
+    document.getElementById('loadMore').classList.remove('active');
+    carregando = false;
+  }
+
+  // ── Ordena ────────────────────────────────────────────────────
+  function sortTodos() {
+    todos.sort((a,b) => ordemDesc
+      ? (b.valorInicial||0) - (a.valorInicial||0)
+      : (a.valorInicial||0) - (b.valorInicial||0)
+    );
+  }
+
+  function toggleOrdem() {
+    ordemDesc = !ordemDesc;
+    document.getElementById('thValor').textContent = 'Valor contrato ' + (ordemDesc ? '↓' : '↑');
+    sortTodos();
+    renderTabela();
+  }
+
+  // ── Renderiza ─────────────────────────────────────────────────
+  function renderTabela() {
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
 
-    items.forEach(c => {
-      const empresa = c.nomeRazaoSocialFornecedor || 'Não informado';
-      const cnpj = c.cnpjFornecedor || '';
-      const objeto = c.objetoContrato || c.informacaoComplementar || '—';
-      const orgao = c.orgaoEntidade?.razaoSocial || c.unidadeOrgao?.nomeUnidade || '—';
-      const valor = c.valorInicial || 0;
-      const data = c.dataAssinatura || c.dataPublicacaoPncp || '';
+    if (!todos.length) {
+      document.getElementById('tabelaContratos').style.display = 'none';
+      document.getElementById('emptyState').style.display = 'block';
+      document.getElementById('emptyState').innerHTML =
+        `<div class="empty-icon">🔍</div><div class="empty-text">Nenhum contrato encontrado com os filtros aplicados</div>`;
+      return;
+    }
+
+    document.getElementById('emptyState').style.display = 'none';
+
+    const total = todos.reduce((s,c)=>s+(c.valorInicial||0),0);
+    document.getElementById('statTotal').textContent = todos.length.toLocaleString('pt-BR');
+    document.getElementById('statValor').textContent = R$(total);
+    document.getElementById('statPremio').textContent = R$(total*0.05);
+    document.getElementById('resultsCount').textContent =
+      `${todos.length} contratos` +
+      (pagAtual < totalPags ? ` · role para carregar mais` : ' · todos carregados');
+
+    todos.forEach(c => {
+      const emp    = c.nomeRazaoSocialFornecedor || 'Não informado';
+      const cpj    = c.cnpjFornecedor || '';
+      const obj    = c.objetoContrato || c.informacaoComplementar || '—';
+      const org    = c.orgaoEntidade?.razaoSocial || c.unidadeOrgao?.nomeUnidade || '—';
+      const val    = c.valorInicial || 0;
+      const dt     = c.dataAssinatura || c.dataPublicacaoPncp || '';
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
-          <div class="empresa-nome">${truncate(empresa, 40)}</div>
-          <div class="empresa-cnpj">${formatCNPJ(cnpj)}</div>
+          <div class="empresa-nome">${cut(emp,40)}</div>
+          <div class="empresa-cnpj">${cnpj(cpj)}</div>
+        </td>
+        <td><div class="objeto-text">${cut(obj,120)}</div></td>
+        <td><div class="orgao-nome">${cut(org,50)}</div></td>
+        <td><div class="data-col">${brDate(dt)}</div></td>
+        <td>
+          <div class="valor">${R$(val)}</div>
+          ${val>0?`<div class="valor-garantia">Garantia ~${R$(val*0.05)}</div>`:''}
         </td>
         <td>
-          <div class="objeto-text">${truncate(objeto, 120)}</div>
-        </td>
-        <td>
-          <div class="orgao-nome">${truncate(orgao, 50)}</div>
-        </td>
-        <td>
-          <div class="data">${formatDateBR(data)}</div>
-        </td>
-        <td>
-          <div class="valor">${formatReal(valor)}</div>
-          ${valor > 0 ? `<div class="valor-garantia">Garantia ~${formatReal(valor * 0.05)}</div>` : ''}
-        </td>
-        <td>
-          <button class="btn-prospectar" onclick='abrirModal(${JSON.stringify({empresa, cnpj, objeto, orgao, valor, data})})'>
+          <button class="btn-prospectar"
+            onclick='abrirModal(${JSON.stringify({emp,cpj,obj,org,val,dt})})'>
             ✉ Prospectar
           </button>
-        </td>
-      `;
+        </td>`;
       tbody.appendChild(tr);
     });
+  }
 
-    document.getElementById('tabelaContratos').style.display = 'table';
-    document.getElementById('btnExport').style.display = 'flex';
-
-    if (totalPaginas > 1) {
-      document.getElementById('pagination').style.display = 'flex';
-      document.getElementById('pageInfo').textContent = `Página ${paginaAtual} de ${totalPaginas}`;
-      document.getElementById('btnPrev').disabled = paginaAtual === 1;
-      document.getElementById('btnNext').disabled = paginaAtual >= totalPaginas;
+  // ── Scroll infinito ───────────────────────────────────────────
+  const observer = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && pagAtual > 0 && pagAtual < totalPags && !carregando) {
+      carregarPagina();
     }
-  }
+  }, { rootMargin: '300px' });
+  observer.observe(document.getElementById('sentinel'));
 
-  async function mudarPagina(dir) {
-    paginaAtual += dir;
-    const di = document.getElementById('dataInicial').value;
-    const df = document.getElementById('dataFinal').value;
-    await carregarPagina(di, df);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
+  // ── Modal ─────────────────────────────────────────────────────
   function abrirModal(d) {
-    document.getElementById('modalEmpresa').textContent = d.empresa;
-    document.getElementById('modalCNPJ').textContent = `CNPJ: ${formatCNPJ(d.cnpj)} · Contrato: ${formatReal(d.valor)}`;
+    document.getElementById('modalEmpresa').textContent = d.emp;
+    document.getElementById('modalSub').textContent =
+      `CNPJ: ${cnpj(d.cpj)} · Contrato: ${R$(d.val)}`;
+    document.getElementById('emailAssunto').value =
+      `${d.emp} — Seguro Garantia para contrato com ${d.org}`;
+    const grt = d.val > 0 ? R$(d.val*0.05) : 'aprox. 5% do valor do contrato';
+    document.getElementById('emailCorpo').value =
+`Olá,
 
-    const assunto = `${d.empresa} — Seguro Garantia para contrato com ${d.orgao}`;
-    const garantia = d.valor > 0 ? formatReal(d.valor * 0.05) : 'aprox. 5% do valor do contrato';
+Parabenizo a ${d.emp} pela conquista do contrato junto ao ${d.org}.
 
-    const corpo = `Olá,
-
-Parabenizo a ${d.empresa} pela conquista do contrato junto ao ${d.orgao}.
-
-Para formalizar a execução, provavelmente será necessário apresentar Seguro Garantia de Execução Contratual — exigência prevista na Lei nº 14.133/2021 para contratos acima de determinado valor.
+Para formalizar a execução, provavelmente será necessário apresentar Seguro Garantia de Execução Contratual — exigência prevista na Lei nº 14.133/2021.
 
 Sou especialista em Seguro Garantia e posso:
 • Cotar com as principais seguradoras (Tokio Marine, Porto Seguro, Zurich) em menos de 24h
 • Emitir a apólice digitalmente, sem burocracia
-• Custo estimado a partir de ${garantia}
+• Custo estimado a partir de ${grt}
 
 Posso reservar 15 minutos para apresentar as opções?
 
@@ -907,9 +448,6 @@ Atenciosamente,
 [Seu nome]
 [Sua corretora] | SUSEP: [número]
 [Telefone]`;
-
-    document.getElementById('emailAssunto').value = assunto;
-    document.getElementById('emailCorpo').value = corpo;
     document.getElementById('modalOverlay').classList.add('open');
   }
 
@@ -918,69 +456,41 @@ Atenciosamente,
   }
 
   function copiarEmail() {
-    const assunto = document.getElementById('emailAssunto').value;
-    const corpo = document.getElementById('emailCorpo').value;
-    const texto = `Assunto: ${assunto}\n\n${corpo}`;
-    navigator.clipboard.writeText(texto).then(() => {
-      showToast('✓ Email copiado para a área de transferência!');
-      fecharModal();
-    });
+    const txt = `Assunto: ${document.getElementById('emailAssunto').value}\n\n${document.getElementById('emailCorpo').value}`;
+    navigator.clipboard.writeText(txt).then(() => { toast('✓ Email copiado!'); fecharModal(); });
   }
 
+  // ── Export CSV ────────────────────────────────────────────────
   function exportarCSV() {
-    if (!dadosCache.length) return;
-
-    const header = ['Empresa', 'CNPJ', 'Objeto', 'Órgão', 'Valor (R$)', 'Garantia Estimada (R$)', 'Data'];
-    const rows = dadosCache.map(c => [
-      c.nomeRazaoSocialFornecedor || '',
-      formatCNPJ(c.cnpjFornecedor || ''),
-      (c.objetoContrato || '').replace(/"/g, '""'),
-      (c.orgaoEntidade?.razaoSocial || c.unidadeOrgao?.nomeUnidade || ''),
-      (c.valorInicial || 0).toFixed(2),
-      ((c.valorInicial || 0) * 0.05).toFixed(2),
-      formatDateBR(c.dataAssinatura || c.dataPublicacaoPncp || '')
+    if (!todos.length) return;
+    const h = ['Empresa','CNPJ','Objeto','Órgão','Valor (R$)','Garantia Est. (R$)','Data'];
+    const rows = todos.map(c => [
+      c.nomeRazaoSocialFornecedor||'',
+      cnpj(c.cnpjFornecedor||''),
+      (c.objetoContrato||'').replace(/"/g,'""'),
+      c.orgaoEntidade?.razaoSocial || c.unidadeOrgao?.nomeUnidade || '',
+      (c.valorInicial||0).toFixed(2),
+      ((c.valorInicial||0)*0.05).toFixed(2),
+      brDate(c.dataAssinatura||c.dataPublicacaoPncp||'')
     ]);
-
-    const csv = [header, ...rows]
-      .map(r => r.map(v => `"${v}"`).join(';'))
-      .join('\n');
-
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+    const csv = [h,...rows].map(r=>r.map(v=>`"${v}"`).join(';')).join('\n');
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `contratos_pncp_${new Date().toISOString().slice(0,10)}.csv`;
+    a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+    a.download = `contratos_${iso(new Date())}.csv`;
     a.click();
-    URL.revokeObjectURL(url);
-    showToast('✓ CSV exportado!');
+    toast('✓ CSV exportado!');
   }
 
-  function showToast(msg) {
+  // ── Utilitários ───────────────────────────────────────────────
+  function toast(msg) {
     const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2800);
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 2800);
   }
 
-  let ordemAsc = false;
-
-  function inverterOrdem() {
-    ordemAsc = !ordemAsc;
-    dadosCache.sort((a, b) => ordemAsc
-      ? (a.valorInicial || 0) - (b.valorInicial || 0)
-      : (b.valorInicial || 0) - (a.valorInicial || 0)
-    );
-    const th = document.querySelector('th[onclick]');
-    th.textContent = 'Valor contrato ' + (ordemAsc ? '↑' : '↓');
-    const total = parseInt(document.getElementById('statTotal').textContent.replace(/\D/g,'')) || dadosCache.length;
-    renderTabela(dadosCache, total);
-  }
-
-  // Fechar modal clicando fora
   document.getElementById('modalOverlay').addEventListener('click', e => {
     if (e.target === document.getElementById('modalOverlay')) fecharModal();
   });
 </script>
-
 </body>
 </html>
