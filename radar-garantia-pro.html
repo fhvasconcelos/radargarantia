@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radar Garantia PRO — PNCP</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+body { font-family: Arial; background:#0f1115; color:#fff; padding:20px }
+input,button { padding:8px; margin:5px }
+button { cursor:pointer }
+table { width:100%; border-collapse: collapse; margin-top:20px }
+th,td { padding:8px; border-bottom:1px solid #333; font-size:13px }
+th { cursor:pointer }
+.stat { margin-top:15px; font-weight:bold }
+</style>
+</head>
+<body>
+
+<h2>⚡ Radar Garantia PRO — PNCP</h2>
+
+<label>Data Inicial:</label>
+<input type="date" id="dataInicial">
+
+<label>Data Final:</label>
+<input type="date" id="dataFinal">
+
+<label>Valor mínimo:</label>
+<input type="number" id="valorMin" value="10000000">
+
+<label>
+<input type="checkbox" id="filtroObras" checked>
+Apenas obras/engenharia
+</label>
+
+<button onclick="buscar()">Buscar</button>
+
+<div class="stat" id="stats"></div>
+
+<table id="tabela" style="display:none">
+<thead>
+<tr>
+<th onclick="ordenar()">Valor ↓</th>
+<th>Empresa</th>
+<th>Órgão</th>
+<th>Objeto</th>
+<th>Data</th>
+<th>Garantia (5%)</th>
+<th>Prêmio (1%)</th>
+<th>Comissão (20%)</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+<script>
+
+let contratos = []
+let ordemDesc = true
+
+const hoje = new Date()
+const seisMeses = new Date()
+seisMeses.setMonth(hoje.getMonth() - 6)
+
+document.getElementById("dataFinal").value = hoje.toISOString().split("T")[0]
+document.getElementById("dataInicial").value = seisMeses.toISOString().split("T")[0]
+
+function extrairValor(c){
+  return (
+    c.valorGlobal ||
+    c.valorTotal ||
+    c.valorEstimado ||
+    c.valorInicial ||
+    0
+  )
+}
+
+function garantia(v){ return v * 0.05 }
+function premio(v){ return garantia(v) * 0.01 }
+function comissao(v){ return premio(v) * 0.20 }
+
+function R$(v){
+  return v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})
+}
+
+async function buscar(){
+
+  contratos = []
+  document.getElementById("tbody").innerHTML = ""
+  document.getElementById("stats").innerText = "Buscando..."
+
+  const dIni = document.getElementById("dataInicial").value.replaceAll("-","")
+  const dFim = document.getElementById("dataFinal").value.replaceAll("-","")
+  const valMin = Number(document.getElementById("valorMin").value)
+  const filtroObras = document.getElementById("filtroObras").checked
+
+  let pagina = 1
+  let totalPaginas = 1
+
+  const palavras = ['obra','engenharia','constru','paviment','reforma','infraestrutura']
+
+  while(pagina <= totalPaginas){
+
+    const url = `https://pncp.gov.br/api/consulta/v1/contratos?dataInicial=${dIni}&dataFinal=${dFim}&pagina=${pagina}&tamanhoPagina=100`
+    const r = await fetch(url)
+    const data = await r.json()
+
+    totalPaginas = data.totalPaginas || 1
+
+    for(const c of data.data || []){
+
+      const valor = extrairValor(c)
+      const objeto = (c.objetoContrato || "").toLowerCase()
+
+      let passa = valor >= valMin
+
+      if(filtroObras){
+        const match = palavras.some(p => objeto.includes(p))
+        passa = passa && match
+      }
+
+      if(passa){
+        c.valorFinal = valor
+        contratos.push(c)
+      }
+    }
+
+    pagina++
+  }
+
+  ordenar(true)
+}
+
+function ordenar(inicial=false){
+
+  contratos.sort((a,b)=>
+    ordemDesc
+    ? b.valorFinal - a.valorFinal
+    : a.valorFinal - b.valorFinal
+  )
+
+  if(!inicial) ordemDesc = !ordemDesc
+
+  render()
+}
+
+function render(){
+
+  const tbody = document.getElementById("tbody")
+  tbody.innerHTML = ""
+
+  let totalValor = 0
+
+  for(const c of contratos){
+
+    totalValor += c.valorFinal
+
+    const tr = document.createElement("tr")
+
+    tr.innerHTML = `
+      <td>${R$(c.valorFinal)}</td>
+      <td>${c.nomeRazaoSocialFornecedor || ''}</td>
+      <td>${c.orgaoEntidade?.razaoSocial || ''}</td>
+      <td>${(c.objetoContrato || '').substring(0,80)}</td>
+      <td>${(c.dataAssinatura || '').substring(0,10)}</td>
+      <td>${R$(garantia(c.valorFinal))}</td>
+      <td>${R$(premio(c.valorFinal))}</td>
+      <td>${R$(comissao(c.valorFinal))}</td>
+    `
+
+    tbody.appendChild(tr)
+  }
+
+  document.getElementById("tabela").style.display = "table"
+
+  document.getElementById("stats").innerHTML = `
+  Contratos: ${contratos.length} |
+  Valor Total: ${R$(totalValor)} |
+  Garantia: ${R$(garantia(totalValor))} |
+  Prêmio Estimado: ${R$(premio(totalValor))} |
+  Comissão Potencial: ${R$(comissao(totalValor))}
+  `
+}
+
+</script>
+</body>
+</html>
