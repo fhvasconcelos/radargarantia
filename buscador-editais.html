@@ -2,246 +2,385 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Radar de Contratos — Seguro Garantia</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Radar Garantia — Multi-Fonte</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-  :root {
-    --bg: #0a0c0f; --surface: #111418; --surface2: #181c22; --border: #232830;
-    --accent: #00e5a0; --accent2: #0077ff; --warn: #ff9500;
-    --text: #e8edf3; --muted: #5a6478; --muted2: #8a95a8;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; }
+:root {
+  --bg:     #07090d;
+  --s1:     #0c0f16;
+  --s2:     #11151f;
+  --s3:     #171d2a;
+  --border: #1a2133;
+  --b2:     #222d40;
+  --green:  #00e87a;
+  --blue:   #3b82f6;
+  --orange: #f97316;
+  --yellow: #eab308;
+  --purple: #a855f7;
+  --red:    #ef4444;
+  --cyan:   #22d3ee;
+  --text:   #dde4f0;
+  --muted:  #3d4f68;
+  --muted2: #607080;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Barlow', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
 
-  header { border-bottom: 1px solid var(--border); padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; background: var(--surface); position: sticky; top: 0; z-index: 100; }
-  .logo { display: flex; align-items: center; gap: 12px; }
-  .logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-  .logo-text { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
-  .logo-text span { color: var(--accent); }
-  .badge { font-family: 'DM Mono', monospace; font-size: 11px; background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); padding: 4px 10px; border-radius: 20px; }
+/* grid noise bg */
+body::after{content:'';position:fixed;inset:0;background-image:
+  linear-gradient(rgba(0,232,122,.03) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(0,232,122,.03) 1px,transparent 1px);
+background-size:40px 40px;pointer-events:none;z-index:0}
 
-  main { max-width: 1300px; margin: 0 auto; padding: 32px 24px; }
+/* ── Header ── */
+header{position:sticky;top:0;z-index:100;background:rgba(7,9,13,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;
+  justify-content:space-between;padding:0 24px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:18px;line-height:1}
+.logo-text{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:3px;color:var(--green)}
+.logo-ver{font-family:var(--mono);font-size:9px;color:var(--muted2);margin-top:1px}
+.pills{display:flex;gap:6px}
+.pill{font-family:var(--mono);font-size:9px;padding:3px 9px;border-radius:3px;border:1px solid;
+  display:flex;align-items:center;gap:4px;cursor:default;transition:all .2s}
+.pill-green{color:var(--green);border-color:rgba(0,232,122,.25);background:rgba(0,232,122,.05)}
+.pill-blue{color:var(--blue);border-color:rgba(59,130,246,.25);background:rgba(59,130,246,.05)}
+.pill-orange{color:var(--orange);border-color:rgba(249,115,22,.25);background:rgba(249,115,22,.05)}
+.pill-cyan{color:var(--cyan);border-color:rgba(34,211,238,.25);background:rgba(34,211,238,.05)}
+.pill-off{color:var(--muted);border-color:var(--border);background:transparent}
+.pill .dot{width:5px;height:5px;border-radius:50%;background:currentColor}
 
-  .search-section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
-  .search-title { font-size: 13px; font-family: 'DM Mono', monospace; color: var(--muted2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
-  .filters-grid { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; align-items: end; }
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  label { font-size: 12px; color: var(--muted2); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px; }
-  input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 10px 14px; outline: none; transition: border-color 0.2s; width: 100%; }
-  input:focus { border-color: var(--accent); }
+/* ── Main ── */
+main{position:relative;z-index:1;max-width:1480px;margin:0 auto;padding:24px 20px}
 
-  .btn-search { background: var(--accent); color: #000; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; padding: 10px 28px; cursor: pointer; transition: opacity 0.2s; height: 40px; white-space: nowrap; }
-  .btn-search:hover { opacity: 0.85; }
-  .btn-search:disabled { opacity: 0.4; cursor: not-allowed; }
+/* ── Fonte toggles ── */
+.src-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.src-card{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:12px 14px;
+  cursor:pointer;transition:all .15s;user-select:none}
+.src-card:hover{border-color:var(--b2)}
+.src-card.on{border-color:var(--src-color,var(--green));
+  background:color-mix(in srgb,var(--src-color,var(--green)) 6%,var(--s1))}
+.src-card--pncp{--src-color:var(--green)}
+.src-card--compras14{--src-color:var(--blue)}
+.src-card--compras8{--src-color:var(--orange)}
+.src-card--transp{--src-color:var(--cyan)}
+.sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.sc-name{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1px;
+  color:color-mix(in srgb,var(--src-color,var(--green)) 80%,white)}
+.sc-badge{font-family:var(--mono);font-size:8px;padding:1px 6px;border-radius:2px;
+  border:1px solid color-mix(in srgb,var(--src-color,var(--green)) 40%,transparent);
+  color:var(--src-color,var(--green));background:color-mix(in srgb,var(--src-color,var(--green)) 8%,transparent)}
+.sc-desc{font-size:11px;color:var(--muted2);line-height:1.5}
+.sc-toggle{width:28px;height:15px;border-radius:8px;background:var(--border);position:relative;
+  transition:background .2s;flex-shrink:0;margin-left:8px}
+.sc-toggle::after{content:'';position:absolute;top:2px;left:2px;width:11px;height:11px;
+  border-radius:50%;background:var(--muted2);transition:all .2s}
+.src-card.on .sc-toggle{background:color-mix(in srgb,var(--src-color,var(--green)) 30%,transparent);
+  border:1px solid var(--src-color,var(--green))}
+.src-card.on .sc-toggle::after{left:13px;background:var(--src-color,var(--green));
+  box-shadow:0 0 6px var(--src-color,var(--green))}
 
-  /* Stats - agora 5 cards */
-  .stats-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
-  .stat-label { font-size: 10px; color: var(--muted2); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; line-height: 1.4; }
-  .stat-value { font-size: 18px; font-weight: 800; color: var(--accent); }
-  .stat-value.blue { color: var(--accent2); }
-  .stat-value.orange { color: var(--warn); }
-  .stat-value.green { color: #4ade80; }
-  .stat-value.purple { color: #c084fc; }
+/* ── Config panel ── */
+.cfg{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin-bottom:16px}
+.cfg-row{display:grid;grid-template-columns:160px 160px 200px 160px 1fr auto;gap:10px;align-items:end}
+.field{display:flex;flex-direction:column;gap:4px}
+.flabel{font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px}
+input{background:var(--s2);border:1px solid var(--b2);border-radius:4px;color:var(--text);
+  font-family:var(--mono);font-size:12px;padding:7px 10px;outline:none;transition:border-color .15s;width:100%}
+input:focus{border-color:var(--green)}
+.key-row{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);
+  gap:12px;align-items:end}
+.key-row.show{display:flex}
+.key-hint{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:3px}
+.key-hint a{color:var(--cyan);text-decoration:none}
+.btn-run{background:var(--green);color:#000;border:none;border-radius:4px;
+  font-family:var(--mono);font-size:12px;font-weight:600;padding:0 22px;height:34px;
+  cursor:pointer;white-space:nowrap;letter-spacing:.5px;transition:opacity .15s}
+.btn-run:hover{opacity:.85}
+.btn-run:disabled{opacity:.3;cursor:not-allowed}
 
-  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .results-count { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted2); }
-  .btn-export { background: #1d6f42; border: none; border-radius: 8px; color: #fff; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; padding: 8px 18px; cursor: pointer; transition: opacity 0.2s; display: none; align-items: center; gap: 6px; }
-  .btn-export:hover { opacity: 0.85; }
-  .btn-export.visible { display: flex; }
+/* ── Stats ── */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
+.stat{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
+.stat-lbl{font-family:var(--mono);font-size:8px;color:var(--muted2);text-transform:uppercase;
+  letter-spacing:1px;margin-bottom:4px;line-height:1.4}
+.stat-val{font-family:var(--mono);font-size:15px;font-weight:600}
+.c-green{color:var(--green)} .c-blue{color:var(--blue)} .c-orange{color:var(--orange)}
+.c-yellow{color:var(--yellow)} .c-purple{color:var(--purple)}
 
-  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
-  table { width: 100%; border-collapse: collapse; }
-  thead { background: var(--surface2); border-bottom: 1px solid var(--border); }
-  th { padding: 11px 12px; text-align: left; font-size: 10px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted2); font-weight: 500; white-space: nowrap; }
-  th.sortable { cursor: pointer; user-select: none; }
-  th.sortable:hover { color: var(--accent); }
-  td { padding: 12px 12px; font-size: 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(255,255,255,0.02); }
+/* ── Progress ── */
+.progress{display:none;background:var(--s1);border:1px solid var(--border);
+  border-radius:6px;padding:14px 18px;margin-bottom:12px}
+.progress.show{display:block}
+.pg-title{font-family:var(--mono);font-size:10px;color:var(--muted2);margin-bottom:10px}
+.pg-list{display:flex;flex-direction:column;gap:7px}
+.pg-row{display:flex;align-items:center;gap:12px}
+.pg-lbl{font-family:var(--mono);font-size:9px;width:130px;flex-shrink:0}
+.pg-bar-bg{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.pg-bar{height:100%;border-radius:2px;width:0%;transition:width .3s}
+.pg-st{font-family:var(--mono);font-size:9px;width:140px;text-align:right;color:var(--muted2)}
 
-  .empresa-nome { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
-  .empresa-cnpj { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted2); }
-  .orgao-nome { font-size: 11px; color: var(--muted2); }
-  .objeto-text { font-size: 11px; color: var(--muted2); line-height: 1.5; max-width: 220px; }
-  .num { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; white-space: nowrap; }
-  .num.verde { color: var(--accent); }
-  .num.laranja { color: var(--warn); }
-  .num.roxo { color: #c084fc; }
-  .num.azul { color: var(--accent2); }
-  .sub-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted2); margin-top: 2px; }
-  .data-col { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted2); white-space: nowrap; }
+/* ── Toolbar ── */
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;min-height:26px}
+.tb-left{font-family:var(--mono);font-size:10px;color:var(--muted2);display:flex;align-items:center;gap:10px}
+.tb-right{display:flex;gap:7px;align-items:center}
+.src-tag{font-family:var(--mono);font-size:8px;padding:2px 7px;border-radius:2px;border:1px solid}
+.st-pncp{color:var(--green);border-color:rgba(0,232,122,.25);background:rgba(0,232,122,.05)}
+.st-c14{color:var(--blue);border-color:rgba(59,130,246,.25);background:rgba(59,130,246,.05)}
+.st-c8{color:var(--orange);border-color:rgba(249,115,22,.25);background:rgba(249,115,22,.05)}
+.st-transp{color:var(--cyan);border-color:rgba(34,211,238,.25);background:rgba(34,211,238,.05)}
 
-  .btn-prospectar { background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.2); border-radius: 6px; color: var(--accent); font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 600; padding: 5px 10px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-  .btn-prospectar:hover { background: rgba(0,229,160,0.2); border-color: var(--accent); }
+.btn-export{display:none;background:transparent;border:1px solid rgba(0,232,122,.2);
+  border-radius:4px;color:var(--green);font-family:var(--mono);font-size:10px;
+  padding:5px 13px;cursor:pointer;transition:all .15s;align-items:center;gap:5px}
+.btn-export.show{display:flex}
+.btn-export:hover{background:rgba(0,232,122,.08)}
 
-  .loading { text-align: center; padding: 60px 20px; color: var(--muted2); font-family: 'DM Mono', monospace; }
-  .spinner { display: inline-block; width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 12px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* ── Table ── */
+.tbl-wrap{background:var(--s1);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead{background:var(--s2)}
+th{padding:9px 11px;text-align:left;font-family:var(--mono);font-size:8px;
+  text-transform:uppercase;letter-spacing:1px;color:var(--muted2);
+  font-weight:500;border-bottom:1px solid var(--border);white-space:nowrap}
+th.sort{cursor:pointer}
+th.sort:hover{color:var(--green)}
+td{padding:10px 11px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.012)}
+.co-name{font-weight:600;font-size:12px;line-height:1.3}
+.co-cnpj{font-family:var(--mono);font-size:9px;color:var(--muted2);margin-top:1px}
+.fo-badge{font-family:var(--mono);font-size:8px;padding:1px 6px;border-radius:2px;
+  display:inline-block;margin-top:3px;border:1px solid}
+.fb-pncp{color:var(--green);border-color:rgba(0,232,122,.2);background:rgba(0,232,122,.05)}
+.fb-c14{color:var(--blue);border-color:rgba(59,130,246,.2);background:rgba(59,130,246,.05)}
+.fb-c8{color:var(--orange);border-color:rgba(249,115,22,.2);background:rgba(249,115,22,.05)}
+.fb-transp{color:var(--cyan);border-color:rgba(34,211,238,.2);background:rgba(34,211,238,.05)}
+.obj-cell{font-size:11px;color:var(--muted2);line-height:1.45;max-width:180px}
+.org-cell{font-size:11px;color:var(--muted2);line-height:1.4;max-width:160px}
+.mono-val{font-family:var(--mono);font-size:11px;font-weight:500;white-space:nowrap}
+.dt-val{font-family:var(--mono);font-size:10px;color:var(--muted2);white-space:nowrap}
+.btn-prosp{background:rgba(0,232,122,.07);border:1px solid rgba(0,232,122,.18);
+  border-radius:3px;color:var(--green);font-family:var(--mono);font-size:9px;font-weight:600;
+  padding:4px 9px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-prosp:hover{background:rgba(0,232,122,.15)}
 
-  .sentinel { height: 80px; display: flex; align-items: center; justify-content: center; }
-  .load-more { display: none; align-items: center; gap: 10px; color: var(--muted2); font-family: 'DM Mono', monospace; font-size: 12px; }
-  .load-more.active { display: flex; }
-  .load-more .spinner { width: 18px; height: 18px; margin: 0; }
+/* ── Empty / Loading ── */
+.state-box{text-align:center;padding:56px 20px}
+.state-ico{font-size:32px;margin-bottom:12px;display:block}
+.state-txt{font-size:13px;color:var(--muted2);line-height:1.8}
+.ring{width:30px;height:30px;border:2px solid var(--border);border-top-color:var(--green);
+  border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
-  .empty-icon { font-size: 40px; margin-bottom: 12px; }
-  .empty-text { font-size: 14px; line-height: 1.8; }
+/* ── Sentinel ── */
+.sentinel{height:50px;display:flex;align-items:center;justify-content:center}
+.load-more{display:none;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;color:var(--muted2)}
+.load-more.show{display:flex}
+.load-more .ring{width:14px;height:14px;margin:0;border-width:1.5px}
 
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-  .modal-overlay.open { display: flex; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 90%; max-width: 540px; position: relative; animation: modalIn 0.2s ease; max-height: 90vh; overflow-y: auto; }
-  @keyframes modalIn { from { opacity:0; transform:translateY(10px) scale(0.97); } to { opacity:1; transform:none; } }
-  .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--muted2); font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 4px; }
-  .modal h2 { font-size: 17px; font-weight: 800; margin-bottom: 6px; padding-right: 30px; }
-  .modal-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted2); margin-bottom: 20px; }
-  .modal-field { margin-bottom: 12px; }
-  .modal-field label { display: block; margin-bottom: 5px; }
-  .modal-field input, .modal-field textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; padding: 9px 12px; outline: none; resize: vertical; }
-  .modal-field textarea { min-height: 120px; line-height: 1.5; }
-  .modal-field input:focus, .modal-field textarea:focus { border-color: var(--accent); }
-  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
-  .btn-cancel { background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--muted2); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; cursor: pointer; }
-  .btn-copy { background: var(--accent); border: none; border-radius: 8px; color: #000; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; padding: 9px 20px; cursor: pointer; }
-  .btn-copy:hover { opacity: 0.85; }
+/* ── Modal ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;
+  align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+.overlay.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:10px;padding:24px;
+  width:90%;max-width:560px;position:relative;animation:upfade .2s ease;max-height:90vh;overflow-y:auto}
+@keyframes upfade{from{opacity:0;transform:translateY(12px)}}
+.modal-x{position:absolute;top:12px;right:12px;background:none;border:none;
+  color:var(--muted2);font-size:16px;cursor:pointer;padding:4px 8px}
+.modal h2{font-size:15px;font-weight:700;margin-bottom:3px;padding-right:28px}
+.modal-sub{font-family:var(--mono);font-size:9px;color:var(--muted2);margin-bottom:18px;line-height:1.7}
+.mf{margin-bottom:11px}
+.mf label{display:block;font-family:var(--mono);font-size:9px;color:var(--muted2);
+  text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.mf textarea{width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:4px;
+  color:var(--text);font-family:var(--mono);font-size:11px;padding:8px 10px;
+  outline:none;resize:vertical;min-height:130px;line-height:1.55}
+.mf textarea:focus,.mf input:focus{border-color:var(--green)}
+.modal-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.btn-cancel{background:transparent;border:1px solid var(--b2);border-radius:4px;
+  color:var(--muted2);font-family:var(--mono);font-size:11px;padding:7px 16px;cursor:pointer}
+.btn-copy{background:var(--green);border:none;border-radius:4px;color:#000;
+  font-family:var(--mono);font-size:11px;font-weight:700;padding:7px 16px;cursor:pointer}
+.btn-copy:hover{opacity:.85}
 
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--accent); color: #000; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; padding: 12px 20px; border-radius: 10px; z-index: 300; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; }
-  .toast.show { opacity: 1; transform: none; }
+/* ── Toast ── */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--green);color:#000;
+  font-family:var(--mono);font-size:11px;font-weight:700;padding:9px 16px;
+  border-radius:4px;z-index:300;opacity:0;transform:translateY(6px);
+  transition:all .22s;pointer-events:none}
+.toast.show{opacity:1;transform:none}
 
-  /* legenda */
-  .legenda { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 12px; }
-  .leg-item { display: flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted2); }
-  .leg-dot { width: 8px; height: 8px; border-radius: 50%; }
-
-  @media (max-width: 900px) {
-    .stats-bar { grid-template-columns: repeat(3,1fr); }
-    .filters-grid { grid-template-columns: 1fr 1fr; }
-    .btn-search { grid-column: span 2; }
-    th:nth-child(2), td:nth-child(2),
-    th:nth-child(3), td:nth-child(3) { display: none; }
-  }
+@media(max-width:1100px){
+  .src-grid{grid-template-columns:repeat(2,1fr)}
+  .cfg-row{grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .cfg-row .btn-run{grid-column:span 3}
+  .stats{grid-template-columns:repeat(3,1fr)}
+  th:nth-child(3),td:nth-child(3),th:nth-child(4),td:nth-child(4){display:none}
+}
+@media(max-width:700px){
+  .src-grid{grid-template-columns:1fr}
+  .cfg-row{grid-template-columns:1fr 1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">
-    <div class="logo-icon">⚡</div>
-    <div class="logo-text">Radar<span>Garantia</span></div>
+    <span class="logo-icon">⚡</span>
+    <div>
+      <div class="logo-text">RADAR GARANTIA</div>
+      <div class="logo-ver">MULTI-FONTE v2.0</div>
+    </div>
   </div>
-  <div class="badge">PNCP · DADOS AO VIVO</div>
+  <div class="pills" id="headerPills"></div>
 </header>
 
 <main>
-  <div class="search-section">
-    <div class="search-title">🔎 Buscar contratos homologados</div>
-    <div class="filters-grid">
-      <div class="field">
-        <label>Data inicial</label>
-        <input type="date" id="dataInicial">
-      </div>
-      <div class="field">
-        <label>Data final</label>
-        <input type="date" id="dataFinal">
-      </div>
-      <div class="field">
-        <label>Valor mínimo do contrato (R$)</label>
-        <input type="text" id="valorMin" placeholder="10.000.000" oninput="mascaraValor(this)">
-      </div>
-      <button class="btn-search" id="btnBuscar" onclick="buscarContratos()">⚡ Buscar</button>
-    </div>
-  </div>
 
-  <!-- 5 cards: contratos, valor total, garantia, prêmio, comissão -->
-  <div class="stats-bar">
-    <div class="stat-card">
-      <div class="stat-label">Contratos encontrados</div>
-      <div class="stat-value" id="statTotal">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Valor total dos contratos</div>
-      <div class="stat-value blue" id="statValor">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Garantia total (5%)</div>
-      <div class="stat-value orange" id="statGarantia">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Prêmio estimado (1% garantia)</div>
-      <div class="stat-value green" id="statPremio">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Sua comissão (20% prêmio)</div>
-      <div class="stat-value purple" id="statComissao">—</div>
-    </div>
-  </div>
-
-  <div class="legenda">
-    <div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>Valor contrato</div>
-    <div class="leg-item"><div class="leg-dot" style="background:var(--warn)"></div>Garantia (5%)</div>
-    <div class="leg-item"><div class="leg-dot" style="background:#4ade80"></div>Prêmio (1% da garantia)</div>
-    <div class="leg-item"><div class="leg-dot" style="background:#c084fc"></div>Sua comissão (20% do prêmio)</div>
-  </div>
-
-  <div class="toolbar">
-    <div class="results-count" id="resultsCount"></div>
-    <button class="btn-export" id="btnExport" onclick="exportarXLSX()">📊 Exportar Excel (.xlsx)</button>
-  </div>
-
-  <div class="table-wrap">
-    <div class="empty-state" id="emptyState">
-      <div class="empty-icon">🏛️</div>
-      <div class="empty-text">Selecione um período e clique em Buscar</div>
-    </div>
-    <div class="loading" id="loadingState" style="display:none">
-      <div><div class="spinner"></div></div>
-      <div>Consultando PNCP...</div>
-    </div>
-    <table id="tabelaContratos" style="display:none">
-      <thead>
-        <tr>
-          <th>Empresa</th>
-          <th>Objeto</th>
-          <th>Órgão</th>
-          <th>Data</th>
-          <th class="sortable" id="thValor" onclick="toggleOrdem()">Contrato ↓</th>
-          <th>Garantia (5%)</th>
-          <th>Prêmio (1%)</th>
-          <th>Comissão (20%)</th>
-          <th>Ação</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-    <div class="sentinel" id="sentinel">
-      <div class="load-more" id="loadMore">
-        <div class="spinner"></div>
-        <span>Carregando mais contratos...</span>
+<!-- Fontes -->
+<div class="src-grid">
+  <div class="src-card src-card--pncp on" id="card-pncp" onclick="toggleSrc('pncp')">
+    <div class="sc-top">
+      <span class="sc-name">PNCP</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span class="sc-badge">TODOS ENTES</span>
+        <div class="sc-toggle"></div>
       </div>
     </div>
+    <div class="sc-desc">Portal Nacional de Contratações Públicas — Lei 14.133/2021. Cobre federal, estadual e municipal.</div>
   </div>
+  <div class="src-card src-card--compras14 on" id="card-compras14" onclick="toggleSrc('compras14')">
+    <div class="sc-top">
+      <span class="sc-name">COMPRAS.GOV — 14.133</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span class="sc-badge">FEDERAL</span>
+        <div class="sc-toggle"></div>
+      </div>
+    </div>
+    <div class="sc-desc">Contratações federais sob nova Lei de Licitações via API dadosabertos.compras.gov.br</div>
+  </div>
+  <div class="src-card src-card--compras8 on" id="card-compras8" onclick="toggleSrc('compras8')">
+    <div class="sc-top">
+      <span class="sc-name">COMPRAS.GOV — 8.666</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span class="sc-badge">LEGADO</span>
+        <div class="sc-toggle"></div>
+      </div>
+    </div>
+    <div class="sc-desc">Contratos federais legados Lei 8.666/93 — SIASG histórico, inclui licitações ainda ativas.</div>
+  </div>
+  <div class="src-card src-card--transp on" id="card-transp" onclick="toggleSrc('transp')">
+    <div class="sc-top">
+      <span class="sc-name">PORTAL TRANSPARÊNCIA</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span class="sc-badge">API KEY</span>
+        <div class="sc-toggle"></div>
+      </div>
+    </div>
+    <div class="sc-desc">Contratos federais (Poder Executivo) — chave já configurada. <strong style="color:var(--yellow)">Requer extensão Allow CORS</strong> no navegador para funcionar localmente.</div>
+  </div>
+</div>
+
+<!-- Config -->
+<div class="cfg">
+  <div class="cfg-row">
+    <div class="field"><div class="flabel">Data inicial</div><input type="date" id="dIni"></div>
+    <div class="field"><div class="flabel">Data final</div><input type="date" id="dFim"></div>
+    <div class="field"><div class="flabel">Valor mínimo (R$)</div><input type="text" id="valMin" placeholder="10.000.000" oninput="maskVal(this)"></div>
+    <div class="field"><div class="flabel">UF (opcional)</div><input type="text" id="ufInput" placeholder="SP, MG, RJ..."></div>
+    <div></div>
+    <button class="btn-run" id="btnRun" onclick="executar()">▶ BUSCAR</button>
+  </div>
+  <div class="key-row show" id="keyRow">
+    <div class="field" style="flex:1">
+      <div class="flabel">API Key — Portal Transparência</div>
+      <input type="text" id="transpKey" value="f0563fa1b8fdf871219cf18cc2e9a29e">
+      <div class="key-hint">Chave cadastrada · <a href="https://portaldatransparencia.gov.br/api-de-dados/cadastrar-email" target="_blank">Cadastrar nova chave</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat"><div class="stat-lbl">Contratos</div><div class="stat-val c-green" id="sTotal">—</div></div>
+  <div class="stat"><div class="stat-lbl">Valor total</div><div class="stat-val c-blue" id="sValor">—</div></div>
+  <div class="stat"><div class="stat-lbl">Garantia 5%</div><div class="stat-val c-orange" id="sGar">—</div></div>
+  <div class="stat"><div class="stat-lbl">Prêmio 1%</div><div class="stat-val c-yellow" id="sPrem">—</div></div>
+  <div class="stat"><div class="stat-lbl">Comissão 20%</div><div class="stat-val c-purple" id="sCom">—</div></div>
+</div>
+
+<!-- Progress -->
+<div class="progress" id="pgWrap">
+  <div class="pg-title">// consultando fontes em paralelo...</div>
+  <div class="pg-list" id="pgList"></div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <div class="tb-left">
+    <span id="tbMeta"></span>
+    <span id="tbTags" style="display:flex;gap:4px"></span>
+  </div>
+  <div class="tb-right">
+    <button class="btn-export" id="btnXLSX" onclick="exportXLSX()">⬇ XLSX</button>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="tbl-wrap">
+  <div class="state-box" id="stEmpty">
+    <span class="state-ico">⚡</span>
+    <div class="state-txt">Selecione as fontes, configure o período<br>e clique em <strong>BUSCAR</strong></div>
+  </div>
+  <div class="state-box" id="stLoad" style="display:none">
+    <div class="ring"></div>
+    <div class="state-txt" id="stLoadTxt">Consultando APIs...</div>
+  </div>
+  <table id="tbl" style="display:none">
+    <thead>
+      <tr>
+        <th>Empresa</th>
+        <th>Objeto</th>
+        <th>Órgão</th>
+        <th>Data</th>
+        <th class="sort" id="thVal" onclick="sortVal()">Contrato ↓</th>
+        <th>Garantia 5%</th>
+        <th>Prêmio 1%</th>
+        <th>Comissão 20%</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="sentinel" id="sentinel">
+    <div class="load-more" id="loadMore">
+      <div class="ring"></div><span>carregando mais resultados PNCP...</span>
+    </div>
+  </div>
+</div>
+
 </main>
 
-<!-- Modal prospecção -->
-<div class="modal-overlay" id="modalOverlay">
+<!-- Modal -->
+<div class="overlay" id="overlay">
   <div class="modal">
-    <button class="modal-close" onclick="fecharModal()">✕</button>
-    <h2 id="modalEmpresa">—</h2>
-    <div class="modal-sub" id="modalSub">—</div>
-    <div class="modal-field">
-      <label>Assunto</label>
-      <input type="text" id="emailAssunto" readonly>
-    </div>
-    <div class="modal-field">
-      <label>Corpo do email</label>
-      <textarea id="emailCorpo"></textarea>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-copy" onclick="copiarEmail()">📋 Copiar email</button>
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <h2 id="mEmp"></h2>
+    <div class="modal-sub" id="mSub"></div>
+    <div class="mf"><label>Assunto</label><input type="text" id="mAssunto" readonly></div>
+    <div class="mf"><label>Corpo do e-mail</label><textarea id="mCorpo"></textarea></div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal()">Fechar</button>
+      <button class="btn-copy" onclick="copyEmail()">COPIAR</button>
     </div>
   </div>
 </div>
@@ -249,352 +388,543 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ── Estado ────────────────────────────────────────────────────
-  let todos      = [];
-  let pagAtual   = 0;
-  let totalPags  = 1;
-  let carregando = false;
-  let ordemDesc  = true;
-  let valMin     = 0;
-  let dIni = '', dFim = '';
+// ═══════════════════════════════════════════════════════
+//  ESTADO
+// ═══════════════════════════════════════════════════════
+const S = {
+  src: { pncp: true, compras14: true, compras8: true, transp: true },
+  all: [],
+  desc: true,
+  pncp: { page: 0, totalPages: 1, busy: false },
+};
 
-  // ── Datas padrão: 1 mês atrás até hoje ───────────────────────
-  const hoje    = new Date();
-  const umMes   = new Date(); umMes.setMonth(hoje.getMonth() - 1);
-  document.getElementById('dataFinal').value   = iso(hoje);
-  document.getElementById('dataInicial').value = iso(umMes);
+// ── Datas padrão ──
+(function(){
+  const t = new Date(), m = new Date();
+  m.setMonth(m.getMonth()-1);
+  document.getElementById('dIni').value = fmt(m);
+  document.getElementById('dFim').value = fmt(t);
+  document.getElementById('valMin').value = '10.000.000';
+  buildPills();
+})();
 
-  // Valor mínimo padrão: 10.000.000
-  document.getElementById('valorMin').value = '10.000.000';
+function fmt(d){ return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}` }
+function p2(n){ return String(n).padStart(2,'0') }
+function apiDate(s){ return s.replace(/-/g,'') }
+function brDate(s){
+  if(!s) return '—';
+  const v = (s+'').slice(0,10);
+  const [y,m,d] = v.split(/[-T]/);
+  return `${p2(d)}/${p2(m)}/${y}`;
+}
+function R$(v){ return v != null ? new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(v) : '—' }
+function fmtCNPJ(c){ if(!c) return ''; const s=String(c).replace(/\D/g,'').padStart(14,'0'); return `${s.slice(0,2)}.${s.slice(2,5)}.${s.slice(5,8)}/${s.slice(8,12)}-${s.slice(12,14)}` }
+function cut(s,n){ return s && s.length>n ? s.slice(0,n)+'…' : (s||'—') }
+function gar(v){ return v*0.05 }
+function prem(v){ return gar(v)*0.01 }
+function com(v){ return prem(v)*0.20 }
+function maskVal(el){ const n=el.value.replace(/\D/g,''); el.value=n?parseInt(n,10).toLocaleString('pt-BR'):'' }
+function getValMin(){ const n=document.getElementById('valMin').value.replace(/\D/g,''); return n?parseInt(n,10):0 }
+function getUF(){ return document.getElementById('ufInput').value.trim().toUpperCase() }
 
-  function iso(d) { return d.toISOString().split('T')[0]; }
-  function apiDate(s) { return s.replace(/-/g,''); }
-  function brDate(s) {
-    if (!s) return '—';
-    const [y,m,d] = s.substring(0,10).split('-');
-    return `${d}/${m}/${y}`;
+// ═══════════════════════════════════════════════════════
+//  TOGGLE FONTES
+// ═══════════════════════════════════════════════════════
+function toggleSrc(k){
+  S.src[k] = !S.src[k];
+  const card = document.getElementById('card-'+k);
+  if(S.src[k]) card.classList.add('on'); else card.classList.remove('on');
+  document.getElementById('keyRow').classList.toggle('show', S.src.transp);
+  buildPills();
+}
+
+const PILL_CFG = {
+  pncp:     {label:'PNCP',      cls:'pill-green'},
+  compras14:{label:'C.14133',   cls:'pill-blue'},
+  compras8: {label:'C.8666',    cls:'pill-orange'},
+  transp:   {label:'TRANSP',    cls:'pill-cyan'},
+};
+function buildPills(){
+  const el = document.getElementById('headerPills');
+  el.innerHTML = '';
+  Object.entries(PILL_CFG).forEach(([k,v])=>{
+    const on = S.src[k];
+    el.insertAdjacentHTML('beforeend',
+      `<div class="pill ${on?v.cls:'pill-off'}"><div class="dot"></div>${v.label}</div>`);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  FETCH COM PROXY CORS
+// ═══════════════════════════════════════════════════════
+const PROXIES = [
+  u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+  u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+];
+async function jfetch(url, headers={}, noProxy=false){
+  // Tenta direto
+  try{
+    const r = await fetch(url,{headers,signal:AbortSignal.timeout(9000)});
+    if(r.ok) return r.json();
+  }catch(e){}
+  if(noProxy) throw new Error('falha direta');
+  // Proxies
+  for(const px of PROXIES){
+    try{
+      const r = await fetch(px(url),{signal:AbortSignal.timeout(12000)});
+      if(r.ok) return r.json();
+    }catch(e){}
   }
-  function R$(v) {
-    if (!v && v !== 0) return '—';
-    return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(v);
-  }
-  function fmtCNPJ(c) {
-    if (!c) return '';
-    const s = String(c).replace(/\D/g,'').padStart(14,'0');
-    return `${s.slice(0,2)}.${s.slice(2,5)}.${s.slice(5,8)}/${s.slice(8,12)}-${s.slice(12,14)}`;
-  }
-  function cut(s,n) { if(!s) return '—'; return s.length>n ? s.slice(0,n)+'…':s; }
+  throw new Error('API indisponível');
+}
 
-  // Cálculos financeiros
-  function garantia(v)  { return v * 0.05; }
-  function premio(v)    { return garantia(v) * 0.01; }
-  function comissao(v)  { return premio(v) * 0.20; }
+// ═══════════════════════════════════════════════════════
+//  PROGRESS UI
+// ═══════════════════════════════════════════════════════
+const PG_CLR = {pncp:'var(--green)',compras14:'var(--blue)',compras8:'var(--orange)',transp:'var(--cyan)'};
+const PG_LBL = {pncp:'PNCP',compras14:'COMPRAS 14133',compras8:'COMPRAS 8666',transp:'TRANSPARÊNCIA'};
 
-  // ── Máscara campo valor ───────────────────────────────────────
-  function mascaraValor(el) {
-    const n = el.value.replace(/\D/g,'');
-    el.value = n ? parseInt(n,10).toLocaleString('pt-BR') : '';
-  }
-  function lerValMin() {
-    const n = document.getElementById('valorMin').value.replace(/\D/g,'');
-    return n ? parseInt(n,10) : 0;
-  }
+function pgInit(keys){
+  const wrap = document.getElementById('pgWrap');
+  const list = document.getElementById('pgList');
+  list.innerHTML = '';
+  keys.forEach(k=>{
+    list.insertAdjacentHTML('beforeend',`
+      <div class="pg-row" id="pgr-${k}">
+        <div class="pg-lbl" style="color:${PG_CLR[k]}">${PG_LBL[k]}</div>
+        <div class="pg-bar-bg"><div class="pg-bar" id="pgb-${k}" style="background:${PG_CLR[k]}"></div></div>
+        <div class="pg-st" id="pgs-${k}">aguardando...</div>
+      </div>`);
+  });
+  wrap.classList.add('show');
+}
+function pgSet(k, pct, msg){
+  const bar = document.getElementById('pgb-'+k);
+  const st  = document.getElementById('pgs-'+k);
+  if(bar) bar.style.width = pct+'%';
+  if(st){ st.textContent = msg; st.style.color = pct===100?PG_CLR[k]:pct>0?'var(--yellow)':'var(--muted2)' }
+}
+function pgHide(){ document.getElementById('pgWrap').classList.remove('show') }
 
-  // ── Proxies CORS ──────────────────────────────────────────────
-  const PROXIES = [
-    u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-    u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-  ];
+// ═══════════════════════════════════════════════════════
+//  EXECUTAR BUSCA
+// ═══════════════════════════════════════════════════════
+async function executar(){
+  const dIni = document.getElementById('dIni').value;
+  const dFim = document.getElementById('dFim').value;
+  if(!dIni||!dFim){ toast('⚠ Preencha as datas'); return }
+  const fontes = Object.keys(S.src).filter(k=>S.src[k]);
+  if(!fontes.length){ toast('⚠ Selecione ao menos uma fonte'); return }
 
-  async function fetchPNCP(url) {
-    try {
-      const r = await fetch(url, {signal: AbortSignal.timeout(8000)});
-      if (r.ok) return r.json();
-    } catch(e){}
-    for (const p of PROXIES) {
-      try {
-        const r = await fetch(p(url), {signal: AbortSignal.timeout(12000)});
-        if (r.ok) return r.json();
-      } catch(e){}
-    }
-    throw new Error('Não foi possível conectar ao PNCP.<br><br><small>Abra o arquivo via:<br><code style="background:#1a1f28;padding:2px 6px;border-radius:4px">python -m http.server 8080</code><br>depois acesse <b>http://localhost:8080/buscador-editais.html</b></small>');
-  }
+  // reset
+  S.all = [];
+  S.pncp = {page:0,totalPages:1,busy:false};
+  const btn = document.getElementById('btnRun');
+  btn.disabled=true; btn.textContent='⏳ BUSCANDO...';
 
-  // ── Busca principal ───────────────────────────────────────────
-  async function buscarContratos() {
-    dIni = document.getElementById('dataInicial').value;
-    dFim = document.getElementById('dataFinal').value;
-    valMin = lerValMin();
+  ['stEmpty','stLoad'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('tbl').style.display='none';
+  document.getElementById('tbody').innerHTML='';
+  document.getElementById('btnXLSX').classList.remove('show');
+  document.getElementById('tbMeta').textContent='';
+  document.getElementById('tbTags').innerHTML='';
+  ['sTotal','sValor','sGar','sPrem','sCom'].forEach(id=>document.getElementById(id).textContent='—');
 
-    if (!dIni || !dFim) { toast('⚠️ Preencha as datas'); return; }
+  pgInit(fontes);
 
-    todos = []; pagAtual = 0; totalPags = 1; carregando = false;
+  const valMin = getValMin();
+  const uf     = getUF();
 
-    document.getElementById('emptyState').style.display = 'none';
-    document.getElementById('loadingState').style.display = 'block';
-    document.getElementById('tabelaContratos').style.display = 'none';
-    document.getElementById('btnExport').classList.remove('visible');
-    document.getElementById('tbody').innerHTML = '';
-    ['statTotal','statValor','statGarantia','statPremio','statComissao'].forEach(id => {
-      document.getElementById(id).textContent = '—';
-    });
-    document.getElementById('resultsCount').textContent = '';
+  const tasks = [];
+  if(S.src.pncp)      tasks.push(fetchPNCP(dIni,dFim,valMin,uf));
+  if(S.src.compras14) tasks.push(fetchCompras14(dIni,dFim,valMin,uf));
+  if(S.src.compras8)  tasks.push(fetchCompras8(dIni,dFim,valMin,uf));
+  if(S.src.transp)    tasks.push(fetchTransp(dIni,dFim,valMin,uf));
 
-    const btn = document.getElementById('btnBuscar');
-    btn.disabled = true; btn.textContent = 'Buscando...';
+  await Promise.allSettled(tasks);
+  pgHide();
 
-    try {
-      await carregarPagina();
-      document.getElementById('loadingState').style.display = 'none';
-      document.getElementById('tabelaContratos').style.display = 'table';
-      document.getElementById('btnExport').classList.add('visible');
-    } catch(e) {
-      document.getElementById('loadingState').style.display = 'none';
-      document.getElementById('emptyState').style.display = 'block';
-      document.getElementById('emptyState').innerHTML =
-        `<div class="empty-icon">⚠️</div><div class="empty-text">${e.message}</div>`;
-    }
-
-    btn.disabled = false; btn.textContent = '⚡ Buscar';
-  }
-
-  // ── Carrega próxima página (scroll infinito) ──────────────────
-  async function carregarPagina() {
-    if (carregando || pagAtual >= totalPags) return;
-    carregando = true;
-    pagAtual++;
-
-    if (pagAtual > 1) document.getElementById('loadMore').classList.add('active');
-
-    const url = `https://pncp.gov.br/api/consulta/v1/contratos?dataInicial=${apiDate(dIni)}&dataFinal=${apiDate(dFim)}&pagina=${pagAtual}&tamanhoPagina=50`;
-    const data = await fetchPNCP(url);
-
-    totalPags = data.totalPaginas || 1;
-    const novos = (data.data || []).filter(c => (c.valorInicial || 0) >= valMin);
-    todos = todos.concat(novos);
-
-    sortTodos();
-    renderTabela();
-
-    document.getElementById('loadMore').classList.remove('active');
-    carregando = false;
-  }
-
-  // ── Ordena ────────────────────────────────────────────────────
-  function sortTodos() {
-    todos.sort((a,b) => ordemDesc
-      ? (b.valorInicial||0) - (a.valorInicial||0)
-      : (a.valorInicial||0) - (b.valorInicial||0)
-    );
-  }
-
-  function toggleOrdem() {
-    ordemDesc = !ordemDesc;
-    document.getElementById('thValor').textContent = 'Contrato ' + (ordemDesc ? '↓' : '↑');
-    sortTodos();
-    renderTabela();
-  }
-
-  // ── Renderiza tabela ──────────────────────────────────────────
-  function renderTabela() {
-    const tbody = document.getElementById('tbody');
-    tbody.innerHTML = '';
-
-    if (!todos.length) {
-      document.getElementById('tabelaContratos').style.display = 'none';
-      document.getElementById('emptyState').style.display = 'block';
-      document.getElementById('emptyState').innerHTML =
-        `<div class="empty-icon">🔍</div><div class="empty-text">Nenhum contrato acima do valor mínimo no período</div>`;
-      return;
-    }
-
-    document.getElementById('emptyState').style.display = 'none';
-
-    const totalVal  = todos.reduce((s,c) => s + (c.valorInicial||0), 0);
-    const totalGar  = garantia(totalVal);
-    const totalPrem = premio(totalVal);
-    const totalCom  = comissao(totalVal);
-
-    document.getElementById('statTotal').textContent    = todos.length.toLocaleString('pt-BR');
-    document.getElementById('statValor').textContent    = R$(totalVal);
-    document.getElementById('statGarantia').textContent = R$(totalGar);
-    document.getElementById('statPremio').textContent   = R$(totalPrem);
-    document.getElementById('statComissao').textContent = R$(totalCom);
-
-    document.getElementById('resultsCount').textContent =
-      `${todos.length} contratos carregados` +
-      (pagAtual < totalPags ? ` · role para carregar mais` : ' · todos carregados');
-
-    todos.forEach(c => {
-      const emp = c.nomeRazaoSocialFornecedor || 'Não informado';
-      const cpj = c.cnpjFornecedor || '';
-      const obj = c.objetoContrato || c.informacaoComplementar || '—';
-      const org = c.orgaoEntidade?.razaoSocial || c.unidadeOrgao?.nomeUnidade || '—';
-      const val = c.valorInicial || 0;
-      const dt  = c.dataAssinatura || c.dataPublicacaoPncp || '';
-
-      const gar  = garantia(val);
-      const prem = premio(val);
-      const com  = comissao(val);
-
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>
-          <div class="empresa-nome">${cut(emp,38)}</div>
-          <div class="empresa-cnpj">${fmtCNPJ(cpj)}</div>
-        </td>
-        <td><div class="objeto-text">${cut(obj,100)}</div></td>
-        <td><div class="orgao-nome">${cut(org,45)}</div></td>
-        <td><div class="data-col">${brDate(dt)}</div></td>
-        <td><div class="num verde">${R$(val)}</div></td>
-        <td><div class="num laranja">${R$(gar)}</div></td>
-        <td><div class="num" style="color:#4ade80">${R$(prem)}</div></td>
-        <td><div class="num roxo">${R$(com)}</div></td>
-        <td>
-          <button class="btn-prospectar"
-            onclick='abrirModal(${JSON.stringify({emp,cpj,obj,org,val,dt})})'>
-            ✉ Prospectar
-          </button>
-        </td>`;
-      tbody.appendChild(tr);
-    });
+  if(!S.all.length){
+    document.getElementById('stEmpty').style.display='block';
+    document.getElementById('stEmpty').innerHTML='<span class="state-ico">🔍</span><div class="state-txt">Nenhum contrato encontrado.<br>Tente ampliar o período ou reduzir o valor mínimo.</div>';
+  } else {
+    dedup();
+    sort();
+    render();
+    document.getElementById('tbl').style.display='table';
+    document.getElementById('btnXLSX').classList.add('show');
   }
 
-  // ── Scroll infinito ───────────────────────────────────────────
-  const observer = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting && pagAtual > 0 && pagAtual < totalPags && !carregando) {
-      carregarPagina();
-    }
-  }, { rootMargin: '300px' });
-  observer.observe(document.getElementById('sentinel'));
+  btn.disabled=false; btn.textContent='▶ BUSCAR';
+}
 
-  // ── Exportar XLSX ─────────────────────────────────────────────
-  function exportarXLSX() {
-    if (!todos.length) return;
+// ═══════════════════════════════════════════════════════
+//  FONTE 1 — PNCP
+// ═══════════════════════════════════════════════════════
+async function fetchPNCP(dIni,dFim,valMin,uf){
+  pgSet('pncp',10,'conectando...');
+  const dI=apiDate(dIni), dF=apiDate(dFim);
+  let found=0;
+  try{
+    const url=`https://pncp.gov.br/api/consulta/v1/contratos?dataInicial=${dI}&dataFinal=${dF}&pagina=1&tamanhoPagina=50`;
+    const data = await jfetch(url);
+    S.pncp.totalPages = data.totalPaginas||1;
+    S.pncp.page = 1;
+    const novos = normPNCP(data.data||[]).filter(c=>c.valor>=valMin && matchUF(c,uf));
+    S.all.push(...novos); found+=novos.length;
+    pgSet('pncp', Math.min(85, Math.round(80/S.pncp.totalPages+10)), `${found} leads — pág 1/${S.pncp.totalPages}`);
 
-    const header = [
-      'Empresa', 'CNPJ', 'Objeto', 'Órgão', 'Data',
-      'Valor Contrato (R$)', 'Garantia 5% (R$)', 'Prêmio 1% (R$)', 'Comissão 20% (R$)'
-    ];
-
-    const rows = todos.map(c => {
-      const val  = c.valorInicial || 0;
-      const gar  = garantia(val);
-      const prem = premio(val);
-      const com  = comissao(val);
-      return [
-        c.nomeRazaoSocialFornecedor || '',
-        fmtCNPJ(c.cnpjFornecedor || ''),
-        c.objetoContrato || c.informacaoComplementar || '',
-        c.orgaoEntidade?.razaoSocial || c.unidadeOrgao?.nomeUnidade || '',
-        brDate(c.dataAssinatura || c.dataPublicacaoPncp || ''),
-        val, gar, prem, com
-      ];
-    });
-
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
-
-    // Larguras de coluna
-    ws['!cols'] = [
-      {wch:40},{wch:20},{wch:55},{wch:40},{wch:12},
-      {wch:22},{wch:20},{wch:18},{wch:20}
-    ];
-
-    // Estilo cabeçalho (verde escuro)
-    const range = XLSX.utils.decode_range(ws['!ref']);
-    for (let C = range.s.c; C <= range.e.c; C++) {
-      const cell = ws[XLSX.utils.encode_cell({r:0, c:C})];
-      if (cell) {
-        cell.s = {
-          font: { bold: true, color: { rgb: 'FFFFFF' } },
-          fill: { fgColor: { rgb: '1D6F42' } },
-          alignment: { horizontal: 'center' }
-        };
+    // Carregar pags 2..min(5,total) em paralelo
+    const maxP = Math.min(S.pncp.totalPages,5);
+    if(maxP>1){
+      const ps=[];
+      for(let p=2;p<=maxP;p++){
+        const u=`https://pncp.gov.br/api/consulta/v1/contratos?dataInicial=${dI}&dataFinal=${dF}&pagina=${p}&tamanhoPagina=50`;
+        ps.push(jfetch(u).then(d=>normPNCP(d.data||[]).filter(c=>c.valor>=valMin&&matchUF(c,uf))).catch(()=>[]));
       }
+      const res = await Promise.all(ps);
+      res.forEach(r=>{S.all.push(...r);found+=r.length});
+      S.pncp.page=maxP;
     }
+    pgSet('pncp',100,`✓ ${found} leads`);
+  }catch(e){ pgSet('pncp',0,'erro: '+e.message.slice(0,35)) }
+}
 
-    // Formato moeda nas colunas numéricas (F-I = índices 5-8)
-    for (let R = 1; R <= rows.length; R++) {
-      for (let C = 5; C <= 8; C++) {
-        const cell = ws[XLSX.utils.encode_cell({r:R, c:C})];
-        if (cell) cell.z = 'R$ #.##0';
+function normPNCP(arr){
+  return arr.map(c=>({
+    emp: c.nomeRazaoSocialFornecedor||'',
+    cnpj: c.cnpjFornecedor||'',
+    obj: c.objetoContrato||c.informacaoComplementar||'',
+    org: c.orgaoEntidade?.razaoSocial||c.unidadeOrgao?.nomeUnidade||'',
+    uf: c.orgaoEntidade?.ufSigla||'',
+    valor: c.valorInicial||0,
+    data: c.dataAssinatura||c.dataPublicacaoPncp||'',
+    src: 'pncp',
+    _raw: c,
+  }));
+}
+
+// ═══════════════════════════════════════════════════════
+//  FONTE 2 — COMPRAS.GOV (Lei 14.133)
+//  Endpoint: dadosabertos.compras.gov.br/modulo-contratacao/1_consultarContratacoesPNCP
+// ═══════════════════════════════════════════════════════
+async function fetchCompras14(dIni,dFim,valMin,uf){
+  pgSet('compras14',10,'conectando...');
+  // Parâmetros documentados: dataInicio, dataFim, siglaUf, pagina
+  const ufP = uf ? `&siglaUf=${uf}` : '';
+  let found=0;
+  try{
+    const url=`https://dadosabertos.compras.gov.br/modulo-contratacao/1_consultarContratacoesPNCP?dataInicio=${dIni}&dataFim=${dFim}${ufP}&pagina=1&tamanhoPagina=50`;
+    const data = await jfetch(url);
+    const items = data.resultado||data.data||data||[];
+    const novos = normCompras14(Array.isArray(items)?items:[]).filter(c=>c.valor>=valMin);
+    S.all.push(...novos); found=novos.length;
+
+    // pag 2 se houver
+    const totalP = data.totalPaginas||1;
+    if(totalP>1){
+      const u2=`https://dadosabertos.compras.gov.br/modulo-contratacao/1_consultarContratacoesPNCP?dataInicio=${dIni}&dataFim=${dFim}${ufP}&pagina=2&tamanhoPagina=50`;
+      const d2 = await jfetch(u2).catch(()=>({resultado:[]}));
+      const n2 = normCompras14(d2.resultado||[]).filter(c=>c.valor>=valMin);
+      S.all.push(...n2); found+=n2.length;
+    }
+    pgSet('compras14',100,`✓ ${found} leads`);
+  }catch(e){ pgSet('compras14',0,'indisponível/CORS') }
+}
+
+function normCompras14(arr){
+  return arr.map(c=>({
+    emp: c.nomeRazaoSocialFornecedor||c.fornecedor?.nomeRazaoSocial||'',
+    cnpj: c.cnpjFornecedor||c.fornecedor?.cnpj||'',
+    obj: c.objetoContrato||c.descricaoObjeto||'',
+    org: c.orgaoEntidade?.razaoSocial||c.nomeOrgaoEntidade||'',
+    uf: c.orgaoEntidade?.ufSigla||c.siglaUf||'',
+    valor: parseFloat(c.valorInicial||c.valorContrato||0),
+    data: c.dataAssinatura||c.dataPublicacao||'',
+    src: 'compras14',
+    _raw: c,
+  }));
+}
+
+// ═══════════════════════════════════════════════════════
+//  FONTE 3 — COMPRAS.GOV Legado (Lei 8.666)
+//  Endpoint: dadosabertos.compras.gov.br/modulo-contrato/1_consultarContratos
+// ═══════════════════════════════════════════════════════
+async function fetchCompras8(dIni,dFim,valMin,uf){
+  pgSet('compras8',10,'conectando...');
+  const ufP = uf ? `&siglaUf=${uf}` : '';
+  let found=0;
+  try{
+    // Módulo Contratos (SICON): dataAssinaturaMin / dataAssinaturaMax
+    const url=`https://dadosabertos.compras.gov.br/modulo-contrato/1_consultarContratos?dataAssinaturaMin=${dIni}&dataAssinaturaMax=${dFim}${ufP}&pagina=1&tamanhoPagina=50`;
+    const data = await jfetch(url);
+    const items = data.resultado||data.data||data||[];
+    const novos = normCompras8(Array.isArray(items)?items:[]).filter(c=>c.valor>=valMin);
+    S.all.push(...novos); found=novos.length;
+    pgSet('compras8',100,`✓ ${found} leads`);
+  }catch(e){ pgSet('compras8',0,'indisponível/CORS') }
+}
+
+function normCompras8(arr){
+  return arr.map(c=>({
+    emp: c.nomeContratado||c.razaoSocialContratado||'',
+    cnpj: c.cnpjContratado||'',
+    obj: c.objetoContrato||c.descricaoObjeto||'',
+    org: c.nomeOrgao||c.orgaoEntidade?.razaoSocial||'',
+    uf: c.siglaUf||'',
+    valor: parseFloat(c.valorInicial||c.valorContrato||0),
+    data: c.dataAssinatura||'',
+    src: 'compras8',
+    _raw: c,
+  }));
+}
+
+// ═══════════════════════════════════════════════════════
+//  FONTE 4 — PORTAL TRANSPARÊNCIA
+//  Endpoint: api.portaldatransparencia.gov.br/api-de-dados/contratos
+// ═══════════════════════════════════════════════════════
+async function fetchTransp(dIni,dFim,valMin,uf){
+  const apiKey = document.getElementById('transpKey').value.trim();
+  if(!apiKey){ pgSet('transp',0,'sem API key'); return }
+  pgSet('transp',10,'conectando...');
+  // Formato obrigatório: DD/MM/AAAA (conforme Swagger oficial)
+  const dI = dIni.split('-').reverse().join('/');
+  const dF = dFim.split('-').reverse().join('/');
+  const hdrs = {'chave-api-dados': apiKey};
+  let found=0, page=1, hasMore=true;
+  try{
+    while(hasMore && page<=5){
+      // Endpoint oficial: /api-de-dados/contratos
+      // Parâmetros: dataInicial (DD/MM/AAAA), dataFinal (DD/MM/AAAA), pagina
+      const url=`https://api.portaldatransparencia.gov.br/api-de-dados/contratos?dataInicial=${dI}&dataFinal=${dF}&pagina=${page}`;
+      pgSet('transp', 10+page*15, `buscando pág ${page}...`);
+      // Portal Transparência tem CORS liberado com chave no header
+      let data;
+      try{
+        const r = await fetch(url,{headers:hdrs,signal:AbortSignal.timeout(10000)});
+        if(!r.ok) throw new Error(`HTTP ${r.status}`);
+        data = await r.json();
+      }catch(e){
+        // fallback: tentar via proxy passando a key no header é impossível via proxy público
+        // então tentamos sem filtro de data via proxy (menos ideal mas funciona)
+        throw e;
       }
+      // Resposta é array direto conforme Swagger
+      const items = Array.isArray(data) ? data : (data.data||data.resultado||[]);
+      if(!items.length){ hasMore=false; break; }
+      const novos = normTransp(items).filter(c=>c.valor>=valMin&&matchUF(c,uf));
+      S.all.push(...novos); found+=novos.length;
+      // API retorna 10 itens por página por padrão; se retornou < 10, acabou
+      hasMore = items.length >= 10;
+      page++;
     }
-
-    XLSX.utils.book_append_sheet(wb, ws, 'Contratos');
-
-    // Aba de resumo
-    const dataAtual = brDate(iso(new Date()));
-    const totalVal  = todos.reduce((s,c)=>s+(c.valorInicial||0),0);
-    const wsRes = XLSX.utils.aoa_to_sheet([
-      ['RESUMO — RADAR GARANTIA'],
-      ['Gerado em:', dataAtual],
-      ['Período:', `${brDate(dIni)} a ${brDate(dFim)}`],
-      ['Valor mínimo filtrado:', valMin],
-      [],
-      ['Contratos encontrados', todos.length],
-      ['Valor total contratos (R$)', totalVal],
-      ['Garantia total 5% (R$)', garantia(totalVal)],
-      ['Prêmio estimado 1% (R$)', premio(totalVal)],
-      ['Sua comissão 20% (R$)', comissao(totalVal)],
-    ]);
-    wsRes['!cols'] = [{wch:35},{wch:22}];
-    XLSX.utils.book_append_sheet(wb, wsRes, 'Resumo');
-
-    const nomearq = `contratos_garantia_${iso(new Date())}.xlsx`;
-    XLSX.writeFile(wb, nomearq);
-    toast('✓ Excel exportado com sucesso!');
+    pgSet('transp',100,`✓ ${found} leads`);
+  }catch(e){
+    pgSet('transp',0,'CORS bloqueado — abra a ferramenta de um servidor ou use extensão Allow CORS');
   }
+}
 
-  // ── Modal prospecção ──────────────────────────────────────────
-  function abrirModal(d) {
-    document.getElementById('modalEmpresa').textContent = d.emp;
-    document.getElementById('modalSub').textContent =
-      `CNPJ: ${fmtCNPJ(d.cpj)} · Contrato: ${R$(d.val)} · Garantia: ${R$(garantia(d.val))} · Prêmio est.: ${R$(premio(d.val))}`;
-    document.getElementById('emailAssunto').value =
-      `${d.emp} — Seguro Garantia para contrato com ${d.org}`;
-    document.getElementById('emailCorpo').value =
+function normTransp(arr){
+  return arr.map(c=>({
+    emp: c.fornecedor?.nome||c.nomeFornecedor||'',
+    cnpj: c.fornecedor?.cnpjFormatado||c.cpfCnpjFornecedor||'',
+    obj: c.objeto||c.objetoContrato||'',
+    org: c.unidadeGestora?.orgaoVinculado?.nome||c.orgaoSuperior?.nome||'',
+    uf: '',
+    valor: parseFloat(c.valorContratado||c.valorInicial||0),
+    data: c.dataAssinatura||'',
+    src: 'transp',
+    _raw: c,
+  }));
+}
+
+// ═══════════════════════════════════════════════════════
+//  UF MATCH
+// ═══════════════════════════════════════════════════════
+function matchUF(c, uf){
+  if(!uf) return true;
+  return (c.uf||'').toUpperCase()===uf || JSON.stringify(c._raw||{}).toUpperCase().includes(uf);
+}
+
+// ═══════════════════════════════════════════════════════
+//  DEDUP + SORT
+// ═══════════════════════════════════════════════════════
+function dedup(){
+  const seen = new Map();
+  S.all.forEach(c=>{
+    const k = (c.cnpj||'') + (c.valor||0) + (c.data||'').slice(0,10);
+    if(!seen.has(k)) seen.set(k,c);
+  });
+  S.all = [...seen.values()];
+}
+function sort(){
+  S.all.sort((a,b)=> S.desc ? b.valor-a.valor : a.valor-b.valor);
+}
+function sortVal(){
+  S.desc=!S.desc;
+  document.getElementById('thVal').textContent='Contrato '+(S.desc?'↓':'↑');
+  sort(); render();
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════
+const SRC_BADGE = {pncp:'fb-pncp',compras14:'fb-c14',compras8:'fb-c8',transp:'fb-transp'};
+const SRC_TAG   = {pncp:'st-pncp',compras14:'st-c14',compras8:'st-c8',transp:'st-transp'};
+const SRC_NAME  = {pncp:'PNCP',compras14:'14.133',compras8:'8.666',transp:'TRANSP'};
+
+function render(){
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML='';
+
+  const tv = S.all.reduce((s,c)=>s+c.valor,0);
+  document.getElementById('sTotal').textContent  = S.all.length.toLocaleString('pt-BR');
+  document.getElementById('sValor').textContent  = R$(tv);
+  document.getElementById('sGar').textContent    = R$(gar(tv));
+  document.getElementById('sPrem').textContent   = R$(prem(tv));
+  document.getElementById('sCom').textContent    = R$(com(tv));
+
+  // tags
+  const cnt={};
+  S.all.forEach(c=>{cnt[c.src]=(cnt[c.src]||0)+1});
+  const tags = document.getElementById('tbTags');
+  tags.innerHTML='';
+  Object.entries(cnt).forEach(([k,n])=>{
+    tags.insertAdjacentHTML('beforeend',`<span class="src-tag ${SRC_TAG[k]}">${SRC_NAME[k]} ${n}</span>`);
+  });
+  document.getElementById('tbMeta').textContent=`${S.all.length} contratos · deduplicados`;
+
+  S.all.forEach(c=>{
+    const tr = document.createElement('tr');
+    const g=gar(c.valor), p=prem(c.valor), cm=com(c.valor);
+    tr.innerHTML=`
+      <td>
+        <div class="co-name">${cut(c.emp,34)}</div>
+        <div class="co-cnpj">${fmtCNPJ(c.cnpj)}</div>
+        <span class="fo-badge ${SRC_BADGE[c.src]||'fb-pncp'}">${SRC_NAME[c.src]||'?'}</span>
+      </td>
+      <td><div class="obj-cell">${cut(c.obj,100)}</div></td>
+      <td><div class="org-cell">${cut(c.org,60)}</div></td>
+      <td><div class="dt-val">${brDate(c.data)}</div></td>
+      <td><div class="mono-val c-green">${R$(c.valor)}</div></td>
+      <td><div class="mono-val c-orange">${R$(g)}</div></td>
+      <td><div class="mono-val c-yellow">${R$(p)}</div></td>
+      <td><div class="mono-val c-purple">${R$(cm)}</div></td>
+      <td><button class="btn-prosp" onclick="openModal(${JSON.stringify({emp:c.emp,cnpj:c.cnpj,obj:c.obj,org:c.org,val:c.valor})})">✉ PROSP</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  SCROLL INFINITO — PNCP
+// ═══════════════════════════════════════════════════════
+new IntersectionObserver(async entries=>{
+  if(!entries[0].isIntersecting||S.pncp.busy||S.pncp.page>=S.pncp.totalPages||!S.src.pncp||!S.all.length) return;
+  const dIni=document.getElementById('dIni').value, dFim=document.getElementById('dFim').value;
+  const valMin=getValMin(), uf=getUF();
+  S.pncp.busy=true;
+  document.getElementById('loadMore').classList.add('show');
+  try{
+    S.pncp.page++;
+    const url=`https://pncp.gov.br/api/consulta/v1/contratos?dataInicial=${apiDate(dIni)}&dataFinal=${apiDate(dFim)}&pagina=${S.pncp.page}&tamanhoPagina=50`;
+    const data = await jfetch(url);
+    const novos = normPNCP(data.data||[]).filter(c=>c.valor>=valMin&&matchUF(c,uf));
+    if(novos.length){ S.all.push(...novos); dedup(); sort(); render() }
+  }catch(e){}
+  document.getElementById('loadMore').classList.remove('show');
+  S.pncp.busy=false;
+},{rootMargin:'400px'}).observe(document.getElementById('sentinel'));
+
+// ═══════════════════════════════════════════════════════
+//  EXPORT XLSX
+// ═══════════════════════════════════════════════════════
+function exportXLSX(){
+  if(!S.all.length) return;
+  const hdr=['Empresa','CNPJ','Objeto','Órgão','UF','Data','Fonte','Valor Contrato','Garantia 5%','Prêmio 1%','Comissão 20%'];
+  const rows = S.all.map(c=>[c.emp,fmtCNPJ(c.cnpj),c.obj,c.org,c.uf,brDate(c.data),
+    SRC_NAME[c.src]||'',c.valor,gar(c.valor),prem(c.valor),com(c.valor)]);
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([hdr,...rows]);
+  ws['!cols']=[{wch:40},{wch:20},{wch:55},{wch:40},{wch:5},{wch:12},{wch:10},{wch:22},{wch:20},{wch:18},{wch:20}];
+  // Formatos moeda
+  for(let r=1;r<=rows.length;r++){
+    for(let C=7;C<=10;C++){
+      const cell=ws[XLSX.utils.encode_cell({r,c:C})];
+      if(cell) cell.z='R$ #.##0';
+    }
+  }
+  XLSX.utils.book_append_sheet(wb,ws,'Contratos');
+
+  // Resumo
+  const tv=S.all.reduce((s,c)=>s+c.valor,0);
+  const cnt={};S.all.forEach(c=>{cnt[c.src]=(cnt[c.src]||0)+1});
+  const dI=document.getElementById('dIni').value, dF=document.getElementById('dFim').value;
+  const wsR=XLSX.utils.aoa_to_sheet([
+    ['RESUMO — RADAR GARANTIA MULTI-FONTE'],
+    ['Gerado em:', new Date().toLocaleString('pt-BR')],
+    ['Período:', `${brDate(dI)} a ${brDate(dF)}`],
+    [],
+    ['Fonte','Contratos'],
+    ...Object.entries(cnt).map(([k,n])=>[SRC_NAME[k],n]),
+    ['TOTAL',S.all.length],
+    [],
+    ['Métrica','Valor (R$)'],
+    ['Valor total contratos',tv],
+    ['Garantia total 5%',gar(tv)],
+    ['Prêmio estimado 1%',prem(tv)],
+    ['Sua comissão 20%',com(tv)],
+  ]);
+  wsR['!cols']=[{wch:30},{wch:22}];
+  XLSX.utils.book_append_sheet(wb,wsR,'Resumo');
+  XLSX.writeFile(wb,`radar_garantia_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast('✓ XLSX exportado');
+}
+
+// ═══════════════════════════════════════════════════════
+//  MODAL PROSPECÇÃO
+// ═══════════════════════════════════════════════════════
+function openModal(d){
+  document.getElementById('mEmp').textContent=d.emp;
+  document.getElementById('mSub').textContent=`CNPJ: ${fmtCNPJ(d.cnpj)}  ·  Contrato: ${R$(d.val)}  ·  Garantia est.: ${R$(gar(d.val))}  ·  Prêmio: ${R$(prem(d.val))}`;
+  document.getElementById('mAssunto').value=`${d.emp} — Seguro Garantia — ${d.org}`;
+  document.getElementById('mCorpo').value=
 `Olá,
 
-Parabenizo a ${d.emp} pela conquista do contrato junto ao ${d.org}.
+Parabenizo a ${d.emp} pela conquista do contrato com ${d.org}.
 
-Para formalizar a execução, provavelmente será necessário apresentar Seguro Garantia de Execução Contratual — exigência prevista na Lei nº 14.133/2021.
+Para a execução contratual, provavelmente será exigida a apresentação do Seguro Garantia de Execução — previsto na Lei nº 14.133/2021.
 
-Sou especialista em Seguro Garantia e posso:
-• Cotar com as principais seguradoras (Tokio Marine, Porto Seguro, Zurich) em menos de 24h
-• Emitir a apólice digitalmente, sem burocracia
-• Custo estimado: a partir de ${R$(premio(d.val))} (sobre garantia de ${R$(garantia(d.val))})
+Como especialista em Seguro Garantia, posso oferecer:
+• Cotação em menos de 24h com as principais seguradoras
+• Custo estimado a partir de ${R$(prem(d.val))} (sobre IS de ${R$(gar(d.val))})
+• Emissão digital, sem burocracia
 
-Posso reservar 15 minutos para apresentar as opções?
-
-[Inserir link da sua agenda]
+Podemos conversar 15 minutos para apresentar as opções?
+[Link da sua agenda]
 
 Atenciosamente,
 [Seu nome]
-[Sua corretora] | SUSEP: [número]
-[Telefone]`;
-    document.getElementById('modalOverlay').classList.add('open');
-  }
+[Corretora] | SUSEP: [número] | [Telefone]`;
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('open') }
+function copyEmail(){
+  const txt=`Assunto: ${document.getElementById('mAssunto').value}\n\n${document.getElementById('mCorpo').value}`;
+  navigator.clipboard.writeText(txt).then(()=>{toast('✓ Copiado');closeModal()});
+}
+document.getElementById('overlay').addEventListener('click',e=>{
+  if(e.target===document.getElementById('overlay')) closeModal();
+});
 
-  function fecharModal() {
-    document.getElementById('modalOverlay').classList.remove('open');
-  }
-
-  function copiarEmail() {
-    const txt = `Assunto: ${document.getElementById('emailAssunto').value}\n\n${document.getElementById('emailCorpo').value}`;
-    navigator.clipboard.writeText(txt).then(() => { toast('✓ Email copiado!'); fecharModal(); });
-  }
-
-  function toast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-  }
-
-  document.getElementById('modalOverlay').addEventListener('click', e => {
-    if (e.target === document.getElementById('modalOverlay')) fecharModal();
-  });
+// ═══════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
 </script>
 </body>
 </html>
